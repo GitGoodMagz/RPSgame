@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RPS Game</title>
+</head>
+<body>
+  <h1>Rock Paper Scissors</h1>
+  <p>Scaffold is running.</p>
+
+  <button id="pingBtn">Test API (/api/ping)</button>
+  <pre id="out"></pre>
+
+  <script>
+    const out = document.getElementById('out');
+    document.getElementById('pingBtn').addEventListener('click', async () => {
+      out.textContent = 'Loading...';
+      try {
+        const res = await fetch('/api/ping');
+        const data = await res.json();
+        out.textContent = JSON.stringify(data, null, 2);
+      } catch (e) {
+        out.textContent = String(e);
+      }
+    });
+  </script>
+</body>
+</html>

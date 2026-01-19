@@ -6,7 +6,7 @@ The application will include user accounts, persistent storage, offline support,
 
 ## Features
 Feature map:  
-https://miro.com/app/board/YOUR_BOARD_ID/
+https://miro.com/app/board/uXjVGO2CLQc=/?share_link_id=637964586964
 
 ## Plan
 Project plan:  
