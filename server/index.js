@@ -1,15 +1,20 @@
 const path = require("path");
 const express = require("express");
+const { idempotency } = require("./middleware/idempotency");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Serve the client folder as static files
 app.use(express.static(path.join(__dirname, "..", "client")));
+app.use(express.json());
 
-// Simple test endpoint (REST-ish API placeholder)
 app.get("/api/ping", (req, res) => {
   res.json({ ok: true, message: "pong" });
+});
+
+app.post("/api/play", idempotency(), (req, res) => {
+  const { choice } = req.body || {};
+  res.json({ ok: true, received: choice ?? null });
 });
 
 app.listen(PORT, () => {
