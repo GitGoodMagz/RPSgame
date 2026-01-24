@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "RPS",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}
