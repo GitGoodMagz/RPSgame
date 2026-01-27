@@ -12,6 +12,10 @@ https://miro.com/app/board/uXjVGO2CLQc=/?share_link_id=637964586964
 Project plan:  
 docs/project-plan.md
 
+## Docs
+docs/ToS.md
+docs/dataPrivacyPolicy.md
+
 ## Tech Stack
 - JavaScript
 - Node.js

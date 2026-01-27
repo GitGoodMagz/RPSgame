@@ -1,12 +1,18 @@
-const path = require("path");
-const express = require("express");
-const { idempotency } = require("./middleware/idempotency");
+import path from "path";
+import express from "express";
+import { fileURLToPath } from "url";
+import userRoutes from "../modules/users/routes.mjs";
+import idempotency from "../modules/middleware/idempotency.mjs";
+
+const filePath = fileURLToPath(import.meta.url);
+const baseDir = path.dirname(filePath);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(express.static(path.join(__dirname, "..", "client")));
+app.use(express.static(path.join(baseDir, "..", "client")));
 app.use(express.json());
+app.use("/api/users", userRoutes);
 
 app.get("/api/ping", (req, res) => {
   res.json({ ok: true, message: "pong" });

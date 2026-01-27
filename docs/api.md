@@ -80,8 +80,3 @@ Create a play (one round).
   "draws": 0,
   "playerMoves": { "rock": 0, "paper": 0, "scissors": 0 }
 }
-mkdir -p tests/bruno
-cat > tests/bruno/README.md <<'EOF'
-Bruno API test collection for the RPS project.
-
-Open this folder in Bruno to run requests against the local server.
