@@ -44,3 +44,12 @@
 - Define and document the RPS API (plays + stats)
 - Scaffold Express routes for /api/plays and /api/stats using in-memory data
 - Add Bruno test collection to the repo
+
+## tested bcrypt
+
+- going back to built-in crypto + PBKDF2 hashing
+- Initially, the project used bcrypt for password hashing. While this is a common industry standard, it was considered unnecessary for the limited scope of this assignment. To reduce external dependencies and keep the solution simpler and more transparent, the password handling was refactored to use Node.js’ built-in crypto module with PBKDF2.
+
+## started with CommonJS > ES Modules
+- started off with commonjs, but migrated everything to ES modules/.mjs to use the ES module syntax
+- As a side effect of this migration, duplicate package.json and package-lock.json files were temporarily created when dependencies were installed from different directories. This resulted in separate Node.js project scopes (root vs /server).

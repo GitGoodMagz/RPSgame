@@ -2,11 +2,12 @@
   "name": "rpsgame",
   "version": "1.0.0",
   "description": "A web-based Rock–Paper–Scissors application built with a client–server architecture.",
-  "main": "index.js",
+  "main": "server/index.mjs",
   "directories": {
     "doc": "docs"
   },
   "scripts": {
+    "start": "node server/index.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -16,13 +17,12 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/GitGoodMagz/RPSgame/issues"
   },
   "homepage": "https://github.com/GitGoodMagz/RPSgame#readme",
   "dependencies": {
-    "bcryptjs": "^3.0.3",
     "express": "^5.2.1"
   }
 }

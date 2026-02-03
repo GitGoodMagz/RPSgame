@@ -1,20 +1,17 @@
 import path from "path";
-import express from "express";
 import { fileURLToPath } from "url";
-import userRoutes from "../modules/users/routes.mjs";
-import idempotency from "../modules/middleware/idempotency.mjs";
-
-const filePath = fileURLToPath(import.meta.url);
-const baseDir = path.dirname(filePath);
+import express from "express";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(express.static(path.join(baseDir, "..", "client")));
-app.use(express.json());
-app.use("/api/users", userRoutes);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-app.get("/api/ping", (req, res) => {
+app.use(express.static(path.join(__dirname, "..", "client")));
+app.use(express.json());
+
+app.get("/api/ping", (_req, res) => {
   res.json({ ok: true, message: "pong" });
 });
 
@@ -32,24 +29,49 @@ function decideResult(playerMove, serverMove) {
   return "loss";
 }
 
+function randomServerMove() {
+  const moves = ["rock", "paper", "scissors"];
+  return moves[Math.floor(Math.random() * moves.length)];
+}
+
 const plays = [];
-const stats = {
-  totalPlays: 0,
-  wins: 0,
-  losses: 0,
-  draws: 0,
-  playerMoves: { rock: 0, paper: 0, scissors: 0 },
-};
+const idemStore = new Map();
+
+function idempotency() {
+  return (req, res, next) => {
+    const key = req.get("Idempotency-Key");
+    if (!key) return res.status(400).json({ ok: false, error: "missing_idempotency_key" });
+
+    const hit = idemStore.get(key);
+    if (hit) {
+      if (hit.headers) {
+        for (const [h, v] of Object.entries(hit.headers)) res.setHeader(h, v);
+      }
+      return res.status(hit.statusCode).json(hit.body);
+    }
+
+    const originalJson = res.json.bind(res);
+    res.json = (body) => {
+      const statusCode = res.statusCode || 200;
+      idemStore.set(key, { statusCode, body, headers: { "Content-Type": "application/json" } });
+      return originalJson(body);
+    };
+
+    next();
+  };
+}
 
 app.post("/api/plays", idempotency(), (req, res) => {
   const { playerMove } = req.body || {};
-  const allowed = new Set(["rock", "paper", "scissors"]);
-
-  if (!allowed.has(playerMove)) {
-    return res.status(400).json({ ok: false, error: "Invalid playerMove" });
+  if (!["rock", "paper", "scissors"].includes(playerMove)) {
+    return res.status(400).json({
+      ok: false,
+      error: "invalid_player_move",
+      allowed: ["rock", "paper", "scissors"]
+    });
   }
 
-  const serverMove = ["rock", "paper", "scissors"][Math.floor(Math.random() * 3)];
+  const serverMove = randomServerMove();
   const result = decideResult(playerMove, serverMove);
 
   const play = {
@@ -57,26 +79,32 @@ app.post("/api/plays", idempotency(), (req, res) => {
     playerMove,
     serverMove,
     result,
-    createdAt: new Date().toISOString(),
+    createdAt: new Date().toISOString()
   };
 
   plays.push(play);
-
-  stats.totalPlays += 1;
-  stats.playerMoves[playerMove] += 1;
-  if (result === "win") stats.wins += 1;
-  if (result === "loss") stats.losses += 1;
-  if (result === "draw") stats.draws += 1;
-
-  res.status(201).json(play);
+  return res.status(201).json(play);
 });
 
-app.get("/api/plays", (req, res) => {
+app.get("/api/plays", (_req, res) => {
   res.json(plays);
 });
 
-app.get("/api/stats", (req, res) => {
-  res.json(stats);
+app.get("/api/plays/stats", (_req, res) => {
+  const totalPlays = plays.length;
+  let wins = 0;
+  let losses = 0;
+  let draws = 0;
+  const playerMoves = { rock: 0, paper: 0, scissors: 0 };
+
+  for (const p of plays) {
+    if (p?.playerMove in playerMoves) playerMoves[p.playerMove] += 1;
+    if (p?.result === "win") wins += 1;
+    else if (p?.result === "loss") losses += 1;
+    else if (p?.result === "draw") draws += 1;
+  }
+
+  res.json({ totalPlays, wins, losses, draws, playerMoves });
 });
 
 app.listen(PORT, () => {

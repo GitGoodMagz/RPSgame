@@ -1,62 +1,89 @@
-import express from "express";
-import bcrypt from "bcryptjs";
-import { createUser, deleteUser } from "./store.mjs";
-import auth from "../middleware/auth.mjs";
+import { Router } from "express";
+import { hashPassword, verifyPassword } from "../password.mjs";
+import { readUsers, writeUsers } from "./store.mjs";
 
-const router = express.Router();
+const router = Router();
 
-router.post("/", async (req, res) => {
-  const { username, password, acceptToS } = req.body || {};
+function s(v) {
+  return String(v ?? "").trim();
+}
 
-  if (typeof username !== "string" || username.trim().length < 3) {
-    return res.status(400).json({ ok: false, error: "INVALID_USERNAME" });
-  }
+function p(v) {
+  return String(v ?? "");
+}
 
-  if (acceptToS !== true) {
-    return res.status(400).json({ ok: false, error: "TOS_NOT_ACCEPTED" });
-  }
-
-  if (typeof password !== "string" || password.length < 6) {
-    return res.status(400).json({ ok: false, error: "INVALID_PASSWORD" });
-  }
-
-  const clean = username.trim();
-  const passHash = await bcrypt.hash(password, 10);
-
+router.post("/register", async (req, res) => {
   try {
-    const { user, token } = createUser({
-      username: clean,
-      passHash,
-      tosAcceptedAt: new Date().toISOString(),
-    });
+    const username = s(req.body?.username);
+    const passwordPlain = p(req.body?.password);
+    const tosAccepted = Boolean(req.body?.tosAccepted);
+
+    if (!username) return res.status(400).json({ ok: false, error: "username_required" });
+    if (!passwordPlain) return res.status(400).json({ ok: false, error: "password_required" });
+
+    const users = await readUsers();
+    const exists = users.some((u) => (u.username ?? "").toLowerCase() === username.toLowerCase());
+    if (exists) return res.status(409).json({ ok: false, error: "username_taken" });
+
+    const now = new Date().toISOString();
+
+    const user = {
+      username,
+      password: hashPassword(passwordPlain),
+      createdAt: now,
+      tosAcceptedAt: tosAccepted ? now : null
+    };
+
+    users.push(user);
+    await writeUsers(users);
 
     return res.status(201).json({
       ok: true,
-      user: { id: user.id, username: user.username, createdAt: user.createdAt },
-      token,
+      user: { username: user.username, createdAt: user.createdAt, tosAcceptedAt: user.tosAcceptedAt }
     });
-  } catch (e) {
-    const status = e.status || 500;
-    return res.status(status).json({ ok: false, error: e.message || "ERROR" });
+  } catch {
+    return res.status(500).json({ ok: false, error: "server_error" });
   }
 });
 
-router.get("/me", auth, (req, res) => {
-  res.json({
-    ok: true,
-    user: {
-      id: req.user.id,
-      username: req.user.username,
-      createdAt: req.user.createdAt,
-      consent: req.user.consent,
-    },
-  });
+router.post("/login", async (req, res) => {
+  try {
+    const username = s(req.body?.username);
+    const passwordPlain = p(req.body?.password);
+
+    if (!username) return res.status(400).json({ ok: false, error: "username_required" });
+    if (!passwordPlain) return res.status(400).json({ ok: false, error: "password_required" });
+
+    const users = await readUsers();
+    const user = users.find((u) => (u.username ?? "").toLowerCase() === username.toLowerCase());
+    if (!user) return res.status(401).json({ ok: false, error: "invalid_credentials" });
+
+    const ok = verifyPassword(passwordPlain, user.password);
+    if (!ok) return res.status(401).json({ ok: false, error: "invalid_credentials" });
+
+    return res.json({
+      ok: true,
+      user: { username: user.username, createdAt: user.createdAt ?? null, tosAcceptedAt: user.tosAcceptedAt ?? null }
+    });
+  } catch {
+    return res.status(500).json({ ok: false, error: "server_error" });
+  }
 });
 
-router.delete("/me", auth, (req, res) => {
-  const ok = deleteUser(req.user.id);
-  if (!ok) return res.status(404).json({ ok: false, error: "USER_NOT_FOUND" });
-  return res.status(204).send();
+router.get("/", async (_req, res) => {
+  try {
+    const users = await readUsers();
+    return res.json({
+      ok: true,
+      users: users.map((u) => ({
+        username: u.username,
+        createdAt: u.createdAt ?? null,
+        tosAcceptedAt: u.tosAcceptedAt ?? null
+      }))
+    });
+  } catch {
+    return res.status(500).json({ ok: false, error: "server_error" });
+  }
 });
 
 export default router;
