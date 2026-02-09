@@ -1,6 +1,7 @@
 import path from "path";
 import { fileURLToPath } from "url";
 import express from "express";
+import usersRouter from "../modules/users/routes.mjs";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -14,6 +15,8 @@ app.use(express.json());
 app.get("/api/ping", (_req, res) => {
   res.json({ ok: true, message: "pong" });
 });
+
+app.use("/api/users", usersRouter);
 
 function makeId(prefix = "play") {
   return `${prefix}_${Date.now()}_${Math.random().toString(16).slice(2)}`;
@@ -43,17 +46,12 @@ function idempotency() {
     if (!key) return res.status(400).json({ ok: false, error: "missing_idempotency_key" });
 
     const hit = idemStore.get(key);
-    if (hit) {
-      if (hit.headers) {
-        for (const [h, v] of Object.entries(hit.headers)) res.setHeader(h, v);
-      }
-      return res.status(hit.statusCode).json(hit.body);
-    }
+    if (hit) return res.status(hit.statusCode).json(hit.body);
 
     const originalJson = res.json.bind(res);
     res.json = (body) => {
       const statusCode = res.statusCode || 200;
-      idemStore.set(key, { statusCode, body, headers: { "Content-Type": "application/json" } });
+      idemStore.set(key, { statusCode, body });
       return originalJson(body);
     };
 

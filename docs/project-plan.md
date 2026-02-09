@@ -1,55 +1,75 @@
-# Project Plan – Rock Paper Scissors
+# Project Plan – Rock Paper Scissors (RPSgame)
+
+## Overview
+Web-based Rock–Paper–Scissors application implemented with a client–server architecture.
 
 ## Client
-- Game interface
-- Player input
-- Result display
+- Single-page client using HTML, CSS, and ES modules
+- Served by the Express server (same origin)
+- UI built with custom Web Components
+- Uses relative URLs
+- One shared fetch function for all API calls
+- Code separated into UI, logic, and data
+
+### Implemented
+- User creation with Terms of Service and Privacy Policy acceptance
+- Modal display of Terms of Service and Data Privacy Policy
+- List users
+- Edit user password
+- Delete user
+- Client-side state handling and view switching
+- UI logic prevents invalid actions (no edit/delete without users)
 
 ## Server
-- Game logic
-- API handling
+- Node.js with Express
+- Uses ES Modules (`.mjs`)
+- REST-ish API
+- Serves static client files
 
 ## User Accounts
-- Register
-- Login
+- Create, update, and delete users
+- User data stored in a local JSON file
+- Passwords hashed before storage
 
-## Database (PostgreSQL)
-- Store users
-- Store results
+### Password handling
+- `bcrypt` initially tested
+- Refactored to Node.js built-in `crypto` with PBKDF2
+- External dependency removed
 
 ## REST-ish API
-- POST /api/plays (create a play)
-- GET /api/plays (list plays)
-- GET /api/stats (aggregate results)
 
-## PWA
-- Installable app
+### Users
+- `POST /api/users/register`
+- `GET /api/users`
+- `PUT /api/users/:username`
+- `DELETE /api/users/:username`
 
-## Offline
-- Play without internet
-- Sync when online
+### Plays
+- `POST /api/plays`
+- `GET /api/plays`
+- `GET /api/plays/stats`
 
-## Tasks for middleware
+## Middleware
+- Custom idempotency middleware implemented
+- Uses `Idempotency-Key`
+- Applied to play creation endpoint
 
-### Design
-- Define idempotency behavior (Idempotency-Key prevents duplicate processing)
+## API Scaffold & Testing
+- Express routes implemented for plays and stats
+- In-memory storage for game data
+- Bruno test collection included
+- API documented in `docs/api.md`
 
-### Implementation
-- Implement and apply idempotency middleware to POST endpoints that create plays
+## Module System Migration
+- Migrated from CommonJS to ES Modules
+- Temporary duplicate `package.json` and `package-lock.json` created during migration
+- Project structure consolidated to a single root scope
 
-### Documentation
-- Document middleware purpose and usage
+## Storage
+- Users stored in a local JSON file
+- Plays stored in memory
 
-## Tasks for API scaffold
-- Define and document the RPS API (plays + stats)
-- Scaffold Express routes for /api/plays and /api/stats using in-memory data
-- Add Bruno test collection to the repo
-
-## tested bcrypt
-
-- going back to built-in crypto + PBKDF2 hashing
-- Initially, the project used bcrypt for password hashing. While this is a common industry standard, it was considered unnecessary for the limited scope of this assignment. To reduce external dependencies and keep the solution simpler and more transparent, the password handling was refactored to use Node.js’ built-in crypto module with PBKDF2.
-
-## started with CommonJS > ES Modules
-- started off with commonjs, but migrated everything to ES modules/.mjs to use the ES module syntax
-- As a side effect of this migration, duplicate package.json and package-lock.json files were temporarily created when dependencies were installed from different directories. This resulted in separate Node.js project scopes (root vs /server).
+## Current State
+- Server API complete
+- User system complete
+- Client user management implemented

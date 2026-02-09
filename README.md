@@ -1,24 +1,27 @@
-# Rock Paper Scissors
+# Rock Paper Scissors (RPSgame)
 
-A web-based Rock–Paper–Scissors application built with a client–server architecture.
+A web-based Rock–Paper–Scissors application with a client–server architecture.
 
-The application will include user accounts, persistent storage, offline support, and is going to be designed as a Progressive Web App.
 
 ## Features
 Feature map:  
 https://miro.com/app/board/uXjVGO2CLQc=/?share_link_id=637964586964
 
-## Plan
-Project plan:  
-docs/project-plan.md
 
-## Docs
-docs/ToS.md
-docs/dataPrivacyPolicy.md
+## Project Plan
+`docs/project-plan.md`
+
+
+## API Documentation
+`docs/api.md`
+
+## Legal
+- Terms of Service: `docs/ToS.md`
+- Data Privacy Policy: `docs/dataPrivacyPolicy.md`
 
 ## Tech Stack
-- JavaScript
+- JavaScript (ES Modules)
 - Node.js
-- PostgreSQL
-- REST-style API
-- Progressive Web App (PWA)
+- Express
+- REST-ish API
+- Web Components
