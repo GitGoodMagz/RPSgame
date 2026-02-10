@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RPSgame – Manage users</title>
+    <link rel="stylesheet" href="./app.css" />
+    <link rel="icon" href="data:," />
+  </head>
+
+  <body>
+    <main class="wrap">
+      <header class="top">
+        <div class="brand">
+          <h1>RPSgame</h1>
+        </div>
+
+        <nav class="nav">
+          <button type="button" data-nav="create" class="tab">
+            Create user
+          </button>
+          <button type="button" data-nav="manage" class="tab active">
+            Manage users
+          </button>
+        </nav>
+      </header>
+
+      <section class="card">
+        <h2>Manage users</h2>
+        <user-manage></user-manage>
+      </section>
+    </main>
+
+    <template id="manageTemplate">
+      <div class="row">
+        <div class="toolbar">
+          <button data-field="refreshButton">Refresh</button>
+          <div class="small" data-field="helpText"></div>
+        </div>
+
+        <section data-field="emptyState" class="empty hidden">
+          <div class="small">No users yet.</div>
+          <button data-field="goCreateButton">Go create a user</button>
+        </section>
+
+        <section data-field="contentState" class="hidden">
+          <div class="list" data-field="userList"></div>
+
+          <div class="split">
+            <section class="subcard hidden" data-field="editCard">
+              <h3>Edit</h3>
+              <div class="row">
+                <div class="small" data-field="selectedUserLabel">
+                  Selected: none
+                </div>
+                <input
+                  data-field="newPasswordInput"
+                  placeholder="new password (optional)"
+                  type="password"
+                />
+                <button data-field="saveButton">Save changes</button>
+              </div>
+            </section>
+
+            <section class="subcard hidden" data-field="deleteCard">
+              <h3>Delete</h3>
+              <div class="row">
+                <div class="small" data-field="selectedUserLabel2">
+                  Selected: none
+                </div>
+                <button data-field="deleteButton">Delete selected user</button>
+              </div>
+            </section>
+          </div>
+        </section>
+      </div>
+    </template>
+
+    <script type="module" src="./app.mjs"></script>
+  </body>
+</html>
