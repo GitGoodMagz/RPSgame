@@ -1,29 +1,59 @@
 # Rock Paper Scissors (RPSgame)
 
-A web-based Rock–Paper–Scissors application with a client–server architecture.
+A web-based Rock–Paper–Scissors application built with a structured client–server architecture.
 
-## Features
+---
 
-Feature map:  
-https://miro.com/app/board/uXjVGO2CLQc=/?share_link_id=92355642496
+## Live Deployment
 
-## Project Plan
+Application URL:  
+https://rpsgame-ml6j.onrender.com
 
-`docs/project-plan.md`
+The application is deployed as a Render Web Service.
 
-## API Documentation
+User data is stored persistently in a PostgreSQL database hosted on Render.
 
-`docs/api.md`
+---
 
-## Legal
+## Architecture
 
-- Terms of Service: `docs/ToS.md`
-- Data Privacy Policy: `docs/dataPrivacyPolicy.md`
+### Client
+
+- Single Page Application (SPA)
+- Custom Web Components
+- ES Modules
+- Centralized state using the Observer pattern
+- Single fetch abstraction for API communication
+- Relative URLs only
+
+### Server
+
+- Node.js with Express
+- Router-based API structure
+- Middleware separated into modules
+- REST-ish JSON API
+
+---
+
+## Storage
+
+- User accounts stored in PostgreSQL (Render)
+- Play data stored in memory (non-persistent)
+
+---
+
+## Documentation
+
+- Project Plan: `docs/project-plan.md`
+- API Documentation: `docs/api.md`
+
+---
 
 ## Tech Stack
 
 - JavaScript (ES Modules)
 - Node.js
 - Express
-- REST-ish API
+- PostgreSQL
+- Render (Web Service + Database)
 - Web Components

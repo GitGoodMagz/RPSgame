@@ -1,6 +1,13 @@
 import { Router } from "express";
 import { hashPassword, verifyPassword } from "../password.mjs";
-import { readUsers, writeUsers } from "./store.mjs";
+import {
+  initUsersTable,
+  listUsers,
+  findUserByUsername,
+  insertUser,
+  updateUserByUsername,
+  deleteUserByUsername
+} from "./pgStore.mjs";
 
 const router = Router();
 
@@ -22,8 +29,17 @@ function toPublicUser(u) {
   };
 }
 
+let didInit = false;
+async function ensureInit() {
+  if (didInit) return;
+  await initUsersTable();
+  didInit = true;
+}
+
 router.post("/register", async (req, res) => {
   try {
+    await ensureInit();
+
     const username = s(req.body?.username);
     const passwordPlain = p(req.body?.password);
     const tosAccepted = Boolean(req.body?.tosAccepted);
@@ -31,9 +47,8 @@ router.post("/register", async (req, res) => {
     if (!username) return res.status(400).json({ ok: false, error: "username_required" });
     if (!passwordPlain) return res.status(400).json({ ok: false, error: "password_required" });
 
-    const users = await readUsers();
-    const exists = users.some((u) => (u.username ?? "").toLowerCase() === username.toLowerCase());
-    if (exists) return res.status(409).json({ ok: false, error: "username_taken" });
+    const existing = await findUserByUsername(username.toLowerCase());
+    if (existing) return res.status(409).json({ ok: false, error: "username_taken" });
 
     const now = new Date().toISOString();
 
@@ -44,8 +59,7 @@ router.post("/register", async (req, res) => {
       tosAcceptedAt: tosAccepted ? now : null
     };
 
-    users.push(user);
-    await writeUsers(users);
+    await insertUser(user);
 
     return res.status(201).json({ ok: true, user: toPublicUser(user) });
   } catch {
@@ -55,14 +69,15 @@ router.post("/register", async (req, res) => {
 
 router.post("/login", async (req, res) => {
   try {
+    await ensureInit();
+
     const username = s(req.body?.username);
     const passwordPlain = p(req.body?.password);
 
     if (!username) return res.status(400).json({ ok: false, error: "username_required" });
     if (!passwordPlain) return res.status(400).json({ ok: false, error: "password_required" });
 
-    const users = await readUsers();
-    const user = users.find((u) => (u.username ?? "").toLowerCase() === username.toLowerCase());
+    const user = await findUserByUsername(username.toLowerCase());
     if (!user) return res.status(401).json({ ok: false, error: "invalid_credentials" });
 
     const ok = verifyPassword(passwordPlain, user.password);
@@ -76,7 +91,8 @@ router.post("/login", async (req, res) => {
 
 router.get("/", async (_req, res) => {
   try {
-    const users = await readUsers();
+    await ensureInit();
+    const users = await listUsers();
     return res.json({ ok: true, users: users.map(toPublicUser) });
   } catch {
     return res.status(500).json({ ok: false, error: "server_error" });
@@ -85,26 +101,28 @@ router.get("/", async (_req, res) => {
 
 router.put("/:username", async (req, res) => {
   try {
+    await ensureInit();
+
     const usernameParam = s(req.params?.username);
     if (!usernameParam) return res.status(400).json({ ok: false, error: "username_required" });
-
-    const users = await readUsers();
-    const idx = users.findIndex((u) => (u.username ?? "").toLowerCase() === usernameParam.toLowerCase());
-    if (idx === -1) return res.status(404).json({ ok: false, error: "user_not_found" });
 
     const passwordPlain = p(req.body?.password);
     const tosAccepted = req.body?.tosAccepted;
 
+    const patch = {};
+
     if (passwordPlain) {
-      users[idx].password = hashPassword(passwordPlain);
+      patch.password = hashPassword(passwordPlain);
     }
 
     if (typeof tosAccepted === "boolean") {
-      users[idx].tosAcceptedAt = tosAccepted ? new Date().toISOString() : null;
+      patch.tosAcceptedAt = tosAccepted ? new Date().toISOString() : null;
     }
 
-    await writeUsers(users);
-    return res.json({ ok: true, user: toPublicUser(users[idx]) });
+    const updated = await updateUserByUsername(usernameParam.toLowerCase(), patch);
+    if (!updated) return res.status(404).json({ ok: false, error: "user_not_found" });
+
+    return res.json({ ok: true, user: toPublicUser(updated) });
   } catch {
     return res.status(500).json({ ok: false, error: "server_error" });
   }
@@ -112,15 +130,13 @@ router.put("/:username", async (req, res) => {
 
 router.delete("/:username", async (req, res) => {
   try {
+    await ensureInit();
+
     const usernameParam = s(req.params?.username);
     if (!usernameParam) return res.status(400).json({ ok: false, error: "username_required" });
 
-    const users = await readUsers();
-    const idx = users.findIndex((u) => (u.username ?? "").toLowerCase() === usernameParam.toLowerCase());
-    if (idx === -1) return res.status(404).json({ ok: false, error: "user_not_found" });
-
-    const removed = users.splice(idx, 1)[0];
-    await writeUsers(users);
+    const removed = await deleteUserByUsername(usernameParam.toLowerCase());
+    if (!removed) return res.status(404).json({ ok: false, error: "user_not_found" });
 
     return res.json({ ok: true, user: toPublicUser(removed) });
   } catch {

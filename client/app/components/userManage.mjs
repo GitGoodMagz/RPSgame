@@ -30,7 +30,7 @@ export class ManageUser extends HTMLElement {
     this.refreshButton.addEventListener("click", refreshUsers);
     this.goCreateButton.addEventListener(
       "click",
-      () => (location.href = "./createUser.html"),
+      () => (location.hash = "#/create"),
     );
 
     this.saveButton.addEventListener("click", async () => {

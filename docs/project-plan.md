@@ -2,48 +2,64 @@
 
 ## Overview
 
-Web-based Rock–Paper–Scissors application implemented with a client–server architecture.
+RPSgame is a web-based Rock–Paper–Scissors application built with a client–server architecture.
+
+The system consists of:
+
+- A Single Page Application (SPA) frontend
+- A REST-ish JSON API
+- A router-based Express backend
+- Replaceable storage implementation
+
+---
 
 ## Client
 
-- Single-page client using HTML, CSS, and ES modules
-- Served by the Express server (same origin)
-- UI built with custom Web Components
-- Uses relative URLs
-- One shared fetch function for all API calls
-- Code separated into state/observer, API/service layer, navigation, utilities, and Web Components
-- Views split into separate pages: createUser.html and manageUser.html are separate view files, with index.html as the entry/redirect.
+The client is implemented as a Single Page Application served by the Express backend (same origin).
 
-### Implemented
+### Characteristics
 
-- User creation with Terms of Service and Privacy Policy acceptance
-- Modal display of Terms of Service and Data Privacy Policy
-- List users
-- Edit user password
-- Delete user
-- Client-side state handling and view switching
-- UI logic prevents invalid actions (no edit/delete without users)
+- Single HTML entry point (`index.html`)
+- Hash-based client-side routing
+- ES Modules
+- Custom Web Components
+- `<template>`-based rendering
+- Centralized application state
+- Observer pattern for state updates
+- Single fetch abstraction for all API calls
+- Relative URLs only
+
+### Structure
+
+- UI components: `user-create`, `user-manage`
+- State module
+- Service/API module
+- Navigation module
+- Utility modules
+
+No direct fetch calls inside UI components.
+
+---
 
 ## Server
 
 - Node.js with Express
-- Uses ES Modules (`.mjs`)
-- REST-ish API
-- Serves static client files
+- ES Modules (`.mjs`)
+- Bootstrap-only server entry (`server/index.mjs`)
+- API logic defined in router modules
+- Static client served by Express
 
-## User Accounts
+### Routes
 
-- Create, update, and delete users
-- User data stored in a local JSON file
-- Passwords hashed before storage
+- `/api/users`
+- `/api/plays`
+- `/api/ping`
 
-### Password handling
+Middleware is defined in separate modules and applied per route.
 
-- `bcrypt` initially tested
-- Refactored to Node.js built-in `crypto` with PBKDF2
-- External dependency removed
+---
 
-## REST-ish API
+## API
 
 ### Users
 
@@ -52,39 +68,57 @@ Web-based Rock–Paper–Scissors application implemented with a client–server
 - `PUT /api/users/:username`
 - `DELETE /api/users/:username`
 
+Passwords are hashed before storage.  
+Sensitive fields are excluded from responses.
+
 ### Plays
 
 - `POST /api/plays`
 - `GET /api/plays`
 - `GET /api/plays/stats`
 
+Each play contains:
+
+- id
+- playerMove
+- serverMove
+- result
+- createdAt
+
+---
+
 ## Middleware
 
-- Custom idempotency middleware implemented
-- Uses `Idempotency-Key`
-- Applied to play creation endpoint
+Idempotency middleware:
 
-## API Scaffold & Testing
+- Requires `Idempotency-Key` header
+- Applied to `POST /api/plays`
+- Replays cached response for duplicate requests
 
-- Express routes implemented for plays and stats
-- In-memory storage for game data
-- Bruno test collection included
-- API documented in `docs/api.md`
-
-## Module System Migration
-
-- Migrated from CommonJS to ES Modules
-- Temporary duplicate `package.json` and `package-lock.json` created during migration
-- Project structure consolidated to a single root scope
+---
 
 ## Storage
 
-- Users stored in a local JSON file
-- Plays stored in memory
+User storage is implemented behind a storage module interface.
 
-## Current State
+Current implementation:
 
-- Server API complete
-- User system complete
-- Client user management implemented
-- Refactored client structure for readability: the previous single app.mjs file was split into multiple ES module files under client/app/ (state/observer logic, API and user service, navigation, shared DOM helpers, and Web Components). client/app.mjs now acts only as the entry point that imports and wires these modules together.
+- Persistent user storage
+- In-memory play storage
+
+Storage implementation can be replaced without changing API routes or client code.
+
+---
+
+## Security
+
+- Password hashing using PBKDF2 (`crypto`)
+- No plaintext password storage
+- Sensitive data not returned to client
+- No authentication sessions or tokens
+
+## Deployment
+
+The server is deployed as a Render Web Service.
+
+A managed PostgreSQL instance on Render provides persistent storage.

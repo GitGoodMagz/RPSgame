@@ -1,163 +1,204 @@
-RPS API (REST-ish)
-Base URL
+# RPS API (REST-ish)
 
-Same origin (served by the Express server)
+Base URL: Same origin (served by Express)
 
 All requests and responses use JSON.
 
-Resource: Play
+---
 
-A play represents one Rock–Paper–Scissors round.
+## Resource: Play
 
-Server-returned fields:
+Fields:
 
-id (string)
+- id (string)
+- playerMove ("rock" | "paper" | "scissors")
+- serverMove ("rock" | "paper" | "scissors")
+- result ("win" | "loss" | "draw")
+- createdAt (ISO timestamp)
 
-playerMove ("rock" | "paper" | "scissors")
+---
 
-serverMove ("rock" | "paper" | "scissors")
+## POST /api/plays
 
-result ("win" | "loss" | "draw")
+Create a play.
 
-createdAt (ISO timestamp)
+Headers:
 
-POST /api/plays
+- Content-Type: application/json
+- Idempotency-Key: <string> (required)
 
-Create a play (one round).
+Request body:
 
-This endpoint is protected by idempotency.
-If the same request is sent again with the same Idempotency-Key, the server returns the original response and does not create a new play.
-
-Headers
-
-Content-Type: application/json
-
-Idempotency-Key: <string> (required)
-
-Request body
-{ "playerMove": "rock" }
-
-Response
 {
-  "id": "play_1700000000000_ab12cd",
-  "playerMove": "rock",
-  "serverMove": "paper",
-  "result": "loss",
-  "createdAt": "2026-01-27T12:00:00.000Z"
+"playerMove": "rock"
 }
 
-GET /api/plays
+Success (201):
+
+{
+"id": "...",
+"playerMove": "rock",
+"serverMove": "...",
+"result": "...",
+"createdAt": "..."
+}
+
+Error responses:
+
+- 400 – Missing Idempotency-Key
+- 400 – Invalid player move
+
+Duplicate requests with the same `Idempotency-Key`
+return the cached response and do not create a new play.
+
+---
+
+## GET /api/plays
 
 Return all recorded plays.
 
-Response
+Success (200):
+
 [
-  {
-    "id": "play_1700000000000_ab12cd",
-    "playerMove": "rock",
-    "serverMove": "paper",
-    "result": "loss",
-    "createdAt": "2026-01-27T12:00:00.000Z"
-  }
+{
+"id": "...",
+"playerMove": "...",
+"serverMove": "...",
+"result": "...",
+"createdAt": "..."
+}
 ]
 
-GET /api/plays/stats
+---
 
-Return aggregated statistics for all plays.
+## GET /api/plays/stats
 
-This endpoint calculates results based on all stored plays.
+Return aggregated statistics.
 
-Response
+Success (200):
+
 {
-  "totalPlays": 1,
-  "wins": 0,
-  "losses": 1,
-  "draws": 0,
-  "playerMoves": {
-    "rock": 1,
-    "paper": 0,
-    "scissors": 0
-  }
+"totalPlays": number,
+"wins": number,
+"losses": number,
+"draws": number,
+"playerMoves": {
+"rock": number,
+"paper": number,
+"scissors": number
+}
 }
 
-Resource: User
+---
 
-A user represents a registered player.
+## Resource: User
 
 Stored fields:
 
-username
+- username
+- password (hashed)
+- createdAt
+- tosAcceptedAt
 
-password (stored as a one-way hash)
+Passwords are never stored in plaintext.
 
-createdAt
+---
 
-tosAcceptedAt
-
-Passwords are never stored in plain text.
-
-POST /api/users/register
+## POST /api/users/register
 
 Register a new user.
 
-Passwords are hashed using a built-in Node.js crypto method before storage.
+Request body:
 
-Request body
 {
-  "username": "player1",
-  "password": "secret123",
-  "tosAccepted": true
+"username": "player1",
+"password": "secret123",
+"tosAccepted": true
 }
 
-Response
+Success (201):
+
 {
-  "ok": true,
-  "user": {
-    "username": "player1",
-    "createdAt": "2026-01-27T12:05:00.000Z",
-    "tosAcceptedAt": "2026-01-27T12:05:00.000Z"
-  }
+"ok": true,
+"user": {
+"username": "...",
+"createdAt": "...",
+"tosAcceptedAt": "..."
+}
 }
 
-POST /api/users/login
+Error responses:
 
-Authenticate a user.
+- 400 – Missing username or password
+- 409 – Username already taken
+- 500 – Server error
 
-The submitted password is hashed and compared with the stored hash.
+---
 
-Request body
+## GET /api/users
+
+Return all users (non-sensitive fields only).
+
+Success (200):
+
 {
-  "username": "player1",
-  "password": "secret123"
+"ok": true,
+"users": [
+{
+"username": "...",
+"createdAt": "...",
+"tosAcceptedAt": "..."
+}
+]
 }
 
-Response
+---
+
+## PUT /api/users/:username
+
+Update user password.
+
+Request body:
+
 {
-  "ok": true,
-  "user": {
-    "username": "player1",
-    "createdAt": "2026-01-27T12:05:00.000Z",
-    "tosAcceptedAt": "2026-01-27T12:05:00.000Z"
-  }
+"password": "newSecret123"
 }
 
+Success (200):
 
-If credentials are invalid, the server responds with status 401.
-
-GET /api/users
-
-Return a list of registered users.
-
-Only non-sensitive fields are returned.
-
-Response
 {
-  "ok": true,
-  "users": [
-    {
-      "username": "player1",
-      "createdAt": "2026-01-27T12:05:00.000Z",
-      "tosAcceptedAt": "2026-01-27T12:05:00.000Z"
-    }
-  ]
+"ok": true,
+"user": {
+"username": "...",
+"createdAt": "...",
+"tosAcceptedAt": "..."
 }
+}
+
+Error responses:
+
+- 400 – Invalid password
+- 404 – User not found
+- 500 – Server error
+
+---
+
+## DELETE /api/users/:username
+
+Delete a user.
+
+Success (200):
+
+{
+"ok": true,
+"user": {
+"username": "...",
+"createdAt": "...",
+"tosAcceptedAt": "..."
+}
+}
+
+Error responses:
+
+- 404 – User not found
+- 500 – Server error

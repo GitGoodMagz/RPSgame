@@ -4,10 +4,109 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>RPSgame</title>
-    <meta http-equiv="refresh" content="0; url=./createUser.html" />
+    <link rel="stylesheet" href="./app.css" />
     <link rel="icon" href="data:," />
   </head>
   <body>
-    <p>Redirecting…</p>
+    <main class="wrap">
+      <header class="top">
+        <div class="brand">
+          <h1>RPSgame</h1>
+        </div>
+        <nav class="nav">
+          <button type="button" data-nav="create" class="tab active">Create user</button>
+          <button type="button" data-nav="manage" class="tab" disabled>Manage users</button>
+        </nav>
+      </header>
+
+      <section class="card" data-view="create">
+        <h2>Create user</h2>
+        <user-create></user-create>
+      </section>
+
+      <section class="card hidden" data-view="manage">
+        <h2>Manage users</h2>
+        <user-manage></user-manage>
+      </section>
+    </main>
+
+    <dialog id="legalDialog" class="dialog">
+      <form method="dialog" class="dialogInner">
+        <div class="dialogTop">
+          <h2 class="dialogTitle" id="legalTitle">Terms</h2>
+          <div class="dialogTabs">
+            <button type="button" class="tabBtn" data-doc="tos">Terms</button>
+            <button type="button" class="tabBtn" data-doc="privacy">Privacy Policy</button>
+          </div>
+        </div>
+
+        <div class="dialogFrameWrap">
+          <iframe id="legalFrame" class="dialogFrame" title="Legal document" src="./ToS.html"></iframe>
+        </div>
+
+        <div class="dialogActions">
+          <button type="submit">Close</button>
+        </div>
+      </form>
+    </dialog>
+
+    <template id="createUserTemplate">
+      <div class="row">
+        <input data-field="usernameInput" placeholder="username" autocomplete="off" />
+        <input data-field="passwordInput" placeholder="password" type="password" />
+
+        <label class="small line">
+          <span class="legalLine">
+            I accept
+            <button type="button" class="link" data-field="openTerms">Terms</button>
+            and acknowledge
+            <button type="button" class="link" data-field="openPrivacy">Privacy Policy</button>
+          </span>
+          <input data-field="termsCheckbox" type="checkbox" />
+        </label>
+
+        <button data-field="createButton">Create user</button>
+        <div class="small" data-field="createHint"></div>
+      </div>
+    </template>
+
+    <template id="manageTemplate">
+      <div class="row">
+        <div class="toolbar">
+          <button data-field="refreshButton">Refresh</button>
+          <div class="small" data-field="helpText"></div>
+        </div>
+
+        <section data-field="emptyState" class="empty hidden">
+          <div class="small">No users yet.</div>
+          <button data-field="goCreateButton">Go create a user</button>
+        </section>
+
+        <section data-field="contentState" class="hidden">
+          <div class="list" data-field="userList"></div>
+
+          <div class="split">
+            <section class="subcard hidden" data-field="editCard">
+              <h3>Edit</h3>
+              <div class="row">
+                <div class="small" data-field="selectedUserLabel">Selected: none</div>
+                <input data-field="newPasswordInput" placeholder="new password (optional)" type="password" />
+                <button data-field="saveButton">Save changes</button>
+              </div>
+            </section>
+
+            <section class="subcard hidden" data-field="deleteCard">
+              <h3>Delete</h3>
+              <div class="row">
+                <div class="small" data-field="selectedUserLabel2">Selected: none</div>
+                <button data-field="deleteButton">Delete selected user</button>
+              </div>
+            </section>
+          </div>
+        </section>
+      </div>
+    </template>
+
+    <script type="module" src="./app.mjs"></script>
   </body>
 </html>

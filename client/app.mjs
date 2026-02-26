@@ -1,7 +1,7 @@
 import { subscribe } from "./app/state.mjs";
-import { bootstrapUsers, refreshUsers, syncNavAvailability } from "./app/users.mjs";
+import { bootstrapUsers, syncNavAvailability } from "./app/users.mjs";
 import { setupLegalDialogTabs } from "./app/legalDialog.mjs";
-import { wireNavigation, checkManageView } from "./app/nav.mjs";
+import { wireNavigation, bootstrapView } from "./app/nav.mjs";
 import { CreateUser } from "./app/components/userCreate.mjs";
 import { ManageUser } from "./app/components/userManage.mjs";
 
@@ -13,5 +13,4 @@ wireNavigation();
 
 subscribe((s) => syncNavAvailability(s));
 bootstrapUsers();
-
-if (checkManageView()) refreshUsers();
+bootstrapView();

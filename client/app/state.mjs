@@ -2,7 +2,8 @@ export const state = {
   users: [],
   selectedUsername: "",
   status: "idle",
-  error: ""
+  error: "",
+  view: "create"
 };
 
 const listeners = new Set();
