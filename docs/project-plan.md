@@ -9,7 +9,7 @@ The system consists of:
 - A Single Page Application (SPA) frontend
 - A REST-ish JSON API
 - A router-based Express backend
-- Replaceable storage implementation
+- PostgreSQL-backed user persistence
 
 ---
 
@@ -99,14 +99,11 @@ Idempotency middleware:
 
 ## Storage
 
-User storage is implemented behind a storage module interface.
+User accounts are stored persistently in a PostgreSQL database hosted on Render.
 
-Current implementation:
+The server connects using the `DATABASE_URL` environment variable.
 
-- Persistent user storage
-- In-memory play storage
-
-Storage implementation can be replaced without changing API routes or client code.
+Play data is stored in memory and is not persisted.
 
 ---
 
@@ -117,8 +114,11 @@ Storage implementation can be replaced without changing API routes or client cod
 - Sensitive data not returned to client
 - No authentication sessions or tokens
 
+---
+
 ## Deployment
 
 The server is deployed as a Render Web Service.
 
-A managed PostgreSQL instance on Render provides persistent storage.
+Live URL:
+https://rpsgame-ml6j.onrender.com
