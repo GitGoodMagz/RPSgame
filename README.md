@@ -37,8 +37,11 @@ User data is stored persistently in a PostgreSQL database hosted on Render.
 
 ## Storage
 
-- User accounts stored in PostgreSQL (Render)
-- Play data stored in memory (non-persistent)
+User accounts and plays are stored persistently in PostgreSQL (Render).
+
+The server connects using the `DATABASE_URL` environment variable.
+
+Idempotency keys are stored in memory.
 
 ---
 

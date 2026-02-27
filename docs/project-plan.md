@@ -99,11 +99,11 @@ Idempotency middleware:
 
 ## Storage
 
-User accounts are stored persistently in a PostgreSQL database hosted on Render.
+User accounts and plays are stored persistently in a PostgreSQL database hosted on Render.
 
 The server connects using the `DATABASE_URL` environment variable.
 
-Play data is stored in memory and is not persisted.
+Idempotency keys are stored in memory and are not persisted.
 
 ---
 

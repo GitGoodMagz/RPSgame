@@ -1,5 +1,6 @@
 import { Router } from "express";
 import idempotency from "../../modules/middleware/idempotency.mjs";
+import { initPlaysTable, insertPlay, listPlays, getPlayStats } from "../../modules/plays/pgStore.mjs";
 
 const playsRouter = Router();
 
@@ -22,52 +23,62 @@ function randomServerMove() {
   return moves[Math.floor(Math.random() * moves.length)];
 }
 
-const plays = [];
+let didInit = false;
+async function ensureInit() {
+  if (didInit) return;
+  await initPlaysTable();
+  didInit = true;
+}
 
-playsRouter.post("/", idempotency(), (req, res) => {
-  const { playerMove } = req.body || {};
-  if (!["rock", "paper", "scissors"].includes(playerMove)) {
-    return res.status(400).json({
-      ok: false,
-      error: "invalid_player_move",
-      allowed: ["rock", "paper", "scissors"]
-    });
+playsRouter.post("/", idempotency(), async (req, res) => {
+  try {
+    await ensureInit();
+
+    const { playerMove } = req.body || {};
+    if (!["rock", "paper", "scissors"].includes(playerMove)) {
+      return res.status(400).json({
+        ok: false,
+        error: "invalid_player_move",
+        allowed: ["rock", "paper", "scissors"]
+      });
+    }
+
+    const serverMove = randomServerMove();
+    const result = decideResult(playerMove, serverMove);
+
+    const play = {
+      id: makeId("play"),
+      playerMove,
+      serverMove,
+      result,
+      createdAt: new Date().toISOString()
+    };
+
+    const saved = await insertPlay(play);
+    return res.status(201).json(saved);
+  } catch {
+    return res.status(500).json({ ok: false, error: "server_error" });
   }
-
-  const serverMove = randomServerMove();
-  const result = decideResult(playerMove, serverMove);
-
-  const play = {
-    id: makeId("play"),
-    playerMove,
-    serverMove,
-    result,
-    createdAt: new Date().toISOString()
-  };
-
-  plays.push(play);
-  return res.status(201).json(play);
 });
 
-playsRouter.get("/", (_req, res) => {
-  res.json(plays);
+playsRouter.get("/", async (_req, res) => {
+  try {
+    await ensureInit();
+    const plays = await listPlays();
+    return res.json(plays);
+  } catch {
+    return res.status(500).json({ ok: false, error: "server_error" });
+  }
 });
 
-playsRouter.get("/stats", (_req, res) => {
-  const totalPlays = plays.length;
-  let wins = 0;
-  let losses = 0;
-  let draws = 0;
-  const playerMoves = { rock: 0, paper: 0, scissors: 0 };
-
-  for (const p of plays) {
-    if (p?.playerMove in playerMoves) playerMoves[p.playerMove] += 1;
-    if (p?.result === "win") wins += 1;
-    else if (p?.result === "loss") losses += 1;
-    else if (p?.result === "draw") draws += 1;
+playsRouter.get("/stats", async (_req, res) => {
+  try {
+    await ensureInit();
+    const stats = await getPlayStats();
+    return res.json(stats);
+  } catch {
+    return res.status(500).json({ ok: false, error: "server_error" });
   }
-
-  res.json({ totalPlays, wins, losses, draws, playerMoves });
 });
 
 export default playsRouter;
