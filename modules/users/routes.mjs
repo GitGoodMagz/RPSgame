@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { hashPassword, verifyPassword } from "../password.mjs";
+import { serverError } from "../i18n.mjs";
 import {
   initUsersTable,
   listUsers,
@@ -44,11 +45,11 @@ router.post("/register", async (req, res) => {
     const passwordPlain = p(req.body?.password);
     const tosAccepted = Boolean(req.body?.tosAccepted);
 
-    if (!username) return res.status(400).json({ ok: false, error: "username_required" });
-    if (!passwordPlain) return res.status(400).json({ ok: false, error: "password_required" });
+    if (!username) return serverError(req, res, 400, "username_required");
+    if (!passwordPlain) return serverError(req, res, 400, "password_required");
 
     const existing = await findUserByUsername(username.toLowerCase());
-    if (existing) return res.status(409).json({ ok: false, error: "username_taken" });
+    if (existing) return serverError(req, res, 409, "username_taken");
 
     const now = new Date().toISOString();
 
@@ -63,7 +64,7 @@ router.post("/register", async (req, res) => {
 
     return res.status(201).json({ ok: true, user: toPublicUser(user) });
   } catch {
-    return res.status(500).json({ ok: false, error: "server_error" });
+    return serverError(req, res, 500, "server_error");
   }
 });
 
@@ -74,18 +75,18 @@ router.post("/login", async (req, res) => {
     const username = s(req.body?.username);
     const passwordPlain = p(req.body?.password);
 
-    if (!username) return res.status(400).json({ ok: false, error: "username_required" });
-    if (!passwordPlain) return res.status(400).json({ ok: false, error: "password_required" });
+    if (!username) return serverError(req, res, 400, "username_required");
+    if (!passwordPlain) return serverError(req, res, 400, "password_required");
 
     const user = await findUserByUsername(username.toLowerCase());
-    if (!user) return res.status(401).json({ ok: false, error: "invalid_credentials" });
+    if (!user) return serverError(req, res, 401, "invalid_credentials");
 
     const ok = verifyPassword(passwordPlain, user.password);
-    if (!ok) return res.status(401).json({ ok: false, error: "invalid_credentials" });
+    if (!ok) return serverError(req, res, 401, "invalid_credentials");
 
     return res.json({ ok: true, user: toPublicUser(user) });
   } catch {
-    return res.status(500).json({ ok: false, error: "server_error" });
+    return serverError(req, res, 500, "server_error");
   }
 });
 
@@ -95,7 +96,7 @@ router.get("/", async (_req, res) => {
     const users = await listUsers();
     return res.json({ ok: true, users: users.map(toPublicUser) });
   } catch {
-    return res.status(500).json({ ok: false, error: "server_error" });
+    return serverError(_req, res, 500, "server_error");
   }
 });
 
@@ -104,7 +105,7 @@ router.put("/:username", async (req, res) => {
     await ensureInit();
 
     const usernameParam = s(req.params?.username);
-    if (!usernameParam) return res.status(400).json({ ok: false, error: "username_required" });
+    if (!usernameParam) return serverError(req, res, 400, "username_required");
 
     const passwordPlain = p(req.body?.password);
     const tosAccepted = req.body?.tosAccepted;
@@ -120,11 +121,11 @@ router.put("/:username", async (req, res) => {
     }
 
     const updated = await updateUserByUsername(usernameParam.toLowerCase(), patch);
-    if (!updated) return res.status(404).json({ ok: false, error: "user_not_found" });
+    if (!updated) return serverError(req, res, 404, "user_not_found");
 
     return res.json({ ok: true, user: toPublicUser(updated) });
   } catch {
-    return res.status(500).json({ ok: false, error: "server_error" });
+    return serverError(req, res, 500, "server_error");
   }
 });
 
@@ -133,14 +134,14 @@ router.delete("/:username", async (req, res) => {
     await ensureInit();
 
     const usernameParam = s(req.params?.username);
-    if (!usernameParam) return res.status(400).json({ ok: false, error: "username_required" });
+    if (!usernameParam) return serverError(req, res, 400, "username_required");
 
     const removed = await deleteUserByUsername(usernameParam.toLowerCase());
-    if (!removed) return res.status(404).json({ ok: false, error: "user_not_found" });
+    if (!removed) return serverError(req, res, 404, "user_not_found");
 
     return res.json({ ok: true, user: toPublicUser(removed) });
   } catch {
-    return res.status(500).json({ ok: false, error: "server_error" });
+    return serverError(req, res, 500, "server_error");
   }
 });
 

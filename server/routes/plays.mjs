@@ -1,5 +1,6 @@
 import { Router } from "express";
 import idempotency from "../../modules/middleware/idempotency.mjs";
+import { serverError } from "../../modules/i18n.mjs";
 import { initPlaysTable, insertPlay, listPlays, getPlayStats } from "../../modules/plays/pgStore.mjs";
 
 const playsRouter = Router();
@@ -36,9 +37,7 @@ playsRouter.post("/", idempotency(), async (req, res) => {
 
     const { playerMove } = req.body || {};
     if (!["rock", "paper", "scissors"].includes(playerMove)) {
-      return res.status(400).json({
-        ok: false,
-        error: "invalid_player_move",
+      return serverError(req, res, 400, "invalid_player_move", {
         allowed: ["rock", "paper", "scissors"]
       });
     }
@@ -57,27 +56,27 @@ playsRouter.post("/", idempotency(), async (req, res) => {
     const saved = await insertPlay(play);
     return res.status(201).json(saved);
   } catch {
-    return res.status(500).json({ ok: false, error: "server_error" });
+    return serverError(req, res, 500, "server_error");
   }
 });
 
-playsRouter.get("/", async (_req, res) => {
+playsRouter.get("/", async (req, res) => {
   try {
     await ensureInit();
     const plays = await listPlays();
     return res.json(plays);
   } catch {
-    return res.status(500).json({ ok: false, error: "server_error" });
+    return serverError(req, res, 500, "server_error");
   }
 });
 
-playsRouter.get("/stats", async (_req, res) => {
+playsRouter.get("/stats", async (req, res) => {
   try {
     await ensureInit();
     const stats = await getPlayStats();
     return res.json(stats);
   } catch {
-    return res.status(500).json({ ok: false, error: "server_error" });
+    return serverError(req, res, 500, "server_error");
   }
 });
 

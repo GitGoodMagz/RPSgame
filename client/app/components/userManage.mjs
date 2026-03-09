@@ -2,6 +2,7 @@ import { state, notify, subscribe } from "../state.mjs";
 import { UserService } from "../userService.mjs";
 import { getTemplate, getField, createElement, formatMeta } from "../dom.mjs";
 import { refreshUsers, syncNavAvailability } from "../users.mjs";
+import { t } from "../i18n.mjs";
 
 export class ManageUser extends HTMLElement {
   connectedCallback() {
@@ -12,26 +13,41 @@ export class ManageUser extends HTMLElement {
     this.helpText = getField(this, "helpText");
 
     this.emptyState = getField(this, "emptyState");
+    this.emptyText = getField(this, "emptyText");
     this.goCreateButton = getField(this, "goCreateButton");
 
     this.contentState = getField(this, "contentState");
     this.userList = getField(this, "userList");
 
     this.editCard = getField(this, "editCard");
+    this.editHeading = getField(this, "editHeading");
     this.deleteCard = getField(this, "deleteCard");
+    this.deleteHeading = getField(this, "deleteHeading");
 
     this.selectedUserLabel = getField(this, "selectedUserLabel");
+    this.newPasswordLabel = getField(this, "newPasswordLabel");
     this.newPasswordInput = getField(this, "newPasswordInput");
     this.saveButton = getField(this, "saveButton");
 
     this.selectedUserLabel2 = getField(this, "selectedUserLabel2");
     this.deleteButton = getField(this, "deleteButton");
 
+    this.refreshButton.textContent = t("manage.refreshButton");
+    this.helpText.setAttribute("aria-live", "polite");
+    this.emptyText.textContent = t("manage.noUsers");
+    this.goCreateButton.textContent = t("manage.goCreateButton");
+    this.editHeading.textContent = t("manage.editHeading");
+    this.deleteHeading.textContent = t("manage.deleteHeading");
+    this.newPasswordLabel.textContent = t("manage.newPasswordLabel");
+    this.newPasswordInput.placeholder = t("manage.newPasswordPlaceholder");
+    this.saveButton.textContent = t("manage.saveButton");
+    this.deleteButton.textContent = t("manage.deleteButton");
+    this.userList.setAttribute("aria-label", t("manage.userListLabel"));
+
     this.refreshButton.addEventListener("click", refreshUsers);
-    this.goCreateButton.addEventListener(
-      "click",
-      () => (location.hash = "#/create"),
-    );
+    this.goCreateButton.addEventListener("click", () => {
+      location.hash = "#/create";
+    });
 
     this.saveButton.addEventListener("click", async () => {
       const username = state.selectedUsername;
@@ -47,7 +63,7 @@ export class ManageUser extends HTMLElement {
         await refreshUsers();
       } catch (e) {
         state.status = "error";
-        state.error = e?.message || "request_failed";
+        state.error = e?.message || t("errors.request_failed");
         notify();
       }
     });
@@ -65,7 +81,7 @@ export class ManageUser extends HTMLElement {
         await refreshUsers();
       } catch (e) {
         state.status = "error";
-        state.error = e?.message || "request_failed";
+        state.error = e?.message || t("errors.request_failed");
         notify();
       }
     });
@@ -76,11 +92,8 @@ export class ManageUser extends HTMLElement {
       const loading = s.status === "loading";
       this.refreshButton.disabled = loading;
 
-      if (s.status === "error") this.helpText.textContent = `Error: ${s.error}`;
-      else
-        this.helpText.textContent = s.users.length
-          ? "Select a user to edit or delete."
-          : "";
+      if (s.status === "error") this.helpText.textContent = s.error;
+      else this.helpText.textContent = s.users.length ? t("manage.helpText") : "";
 
       const hasUsers = s.users.length > 0;
       this.emptyState.classList.toggle("hidden", hasUsers);
@@ -100,8 +113,9 @@ export class ManageUser extends HTMLElement {
       this.editCard.classList.toggle("hidden", !hasSelection);
       this.deleteCard.classList.toggle("hidden", !hasSelection);
 
-      this.selectedUserLabel.textContent = `Selected: ${s.selectedUsername || "none"}`;
-      this.selectedUserLabel2.textContent = `Selected: ${s.selectedUsername || "none"}`;
+      const selectedText = `${t("manage.selected")}: ${s.selectedUsername || t("manage.none")}`;
+      this.selectedUserLabel.textContent = selectedText;
+      this.selectedUserLabel2.textContent = selectedText;
 
       this.saveButton.disabled = loading || !hasSelection;
       this.newPasswordInput.disabled = loading || !hasSelection;
@@ -113,10 +127,9 @@ export class ManageUser extends HTMLElement {
     const nodes = [];
 
     for (const user of s.users) {
-      const item = createElement(
-        "div",
-        user.username === s.selectedUsername ? "item active" : "item",
-      );
+      const item = createElement("button", user.username === s.selectedUsername ? "item active" : "item");
+      item.type = "button";
+      item.setAttribute("aria-pressed", String(user.username === s.selectedUsername));
 
       const left = createElement("div");
       const strong = createElement("strong");

@@ -1,25 +1,20 @@
-const seen = new Map();
+import { serverError } from "../i18n.mjs";
 
-function idempotency(options = {}) {
-  const ttlMs = Number.isFinite(options.ttlMs) ? options.ttlMs : 10 * 60 * 1000;
-
+export default function idempotency(idemStore = new Map()) {
   return (req, res, next) => {
     const key = req.get("Idempotency-Key");
+    if (!key) return serverError(req, res, 400, "missing_idempotency_key");
 
-    if (!key) {
-      return res.status(400).json({ ok: false, error: "Missing Idempotency-Key" });
-    }
+    const hit = idemStore.get(key);
+    if (hit) return res.status(hit.statusCode).json(hit.body);
 
-    const now = Date.now();
-    const expiresAt = seen.get(key);
+    const originalJson = res.json.bind(res);
+    res.json = (body) => {
+      const statusCode = res.statusCode || 200;
+      idemStore.set(key, { statusCode, body });
+      return originalJson(body);
+    };
 
-    if (expiresAt && expiresAt > now) {
-      return res.status(409).json({ ok: false, error: "Duplicate request" });
-    }
-
-    seen.set(key, now + ttlMs);
     next();
   };
 }
-
-export default idempotency;

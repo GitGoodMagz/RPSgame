@@ -3,20 +3,37 @@ import { UserService } from "../userService.mjs";
 import { getTemplate, getField } from "../dom.mjs";
 import { openLegalDialog } from "../legalDialog.mjs";
 import { refreshUsers, syncNavAvailability } from "../users.mjs";
+import { t } from "../i18n.mjs";
 
 export class CreateUser extends HTMLElement {
   connectedCallback() {
     const fragment = getTemplate("createUserTemplate").content.cloneNode(true);
     this.replaceChildren(fragment);
 
+    const usernameLabel = getField(this, "usernameLabel");
     const usernameInput = getField(this, "usernameInput");
+    const passwordLabel = getField(this, "passwordLabel");
     const passwordInput = getField(this, "passwordInput");
     const termsCheckbox = getField(this, "termsCheckbox");
     const createButton = getField(this, "createButton");
     const createHint = getField(this, "createHint");
 
+    const tosPrefix = getField(this, "tosPrefix");
     const openTerms = getField(this, "openTerms");
+    const tosMiddle = getField(this, "tosMiddle");
     const openPrivacy = getField(this, "openPrivacy");
+
+    usernameLabel.textContent = t("create.usernameLabel");
+    usernameInput.placeholder = t("create.usernamePlaceholder");
+    passwordLabel.textContent = t("create.passwordLabel");
+    passwordInput.placeholder = t("create.passwordPlaceholder");
+    tosPrefix.textContent = t("create.tosPrefix");
+    openTerms.textContent = t("shell.terms");
+    tosMiddle.textContent = t("create.tosMiddle");
+    openPrivacy.textContent = t("shell.privacy");
+    termsCheckbox.setAttribute("aria-label", t("create.checkboxLabel"));
+    createButton.textContent = t("create.createButton");
+    createHint.setAttribute("aria-live", "polite");
 
     openTerms.addEventListener("click", () => openLegalDialog("tos"));
     openPrivacy.addEventListener("click", () => openLegalDialog("privacy"));
@@ -29,7 +46,7 @@ export class CreateUser extends HTMLElement {
       if (!username || !password) return;
 
       if (!accepted) {
-        createHint.textContent = "Please accept Terms before creating a user.";
+        createHint.textContent = t("create.termsRequired");
         return;
       }
 
@@ -43,12 +60,12 @@ export class CreateUser extends HTMLElement {
         usernameInput.value = "";
         passwordInput.value = "";
         termsCheckbox.checked = false;
-        createHint.textContent = "User created.";
+        createHint.textContent = t("create.created");
       } catch (e) {
         state.status = "error";
-        state.error = e?.message || "request_failed";
+        state.error = e?.message || t("errors.request_failed");
         notify();
-        createHint.textContent = `Error: ${state.error}`;
+        createHint.textContent = state.error;
       }
     });
 
@@ -61,7 +78,7 @@ export class CreateUser extends HTMLElement {
       termsCheckbox.disabled = loading;
       openTerms.disabled = loading;
       openPrivacy.disabled = loading;
-      if (s.status === "error") createHint.textContent = `Error: ${s.error}`;
+      if (s.status === "error") createHint.textContent = s.error;
     });
   }
 

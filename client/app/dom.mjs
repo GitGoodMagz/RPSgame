@@ -1,3 +1,5 @@
+import { getClientLanguage, t } from "./i18n.mjs";
+
 export function getTemplate(id) {
   const tpl = document.getElementById(id);
   if (!tpl || !(tpl instanceof HTMLTemplateElement)) throw new Error(`Missing template: ${id}`);
@@ -20,7 +22,7 @@ export function formatDateTime(value) {
   if (!value) return "";
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return "";
-  return d.toLocaleString(undefined, {
+  return d.toLocaleString(getClientLanguage(), {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -32,8 +34,8 @@ export function formatDateTime(value) {
 export function formatMeta(user) {
   const parts = [];
   const created = formatDateTime(user.createdAt);
-  if (created) parts.push(`Created: ${created}`);
+  if (created) parts.push(`${t("manage.metaCreated")}: ${created}`);
   const tos = formatDateTime(user.tosAcceptedAt);
-  if (tos) parts.push(`Terms accepted: ${tos}`);
+  if (tos) parts.push(`${t("manage.metaTermsAccepted")}: ${tos}`);
   return parts.join(" • ");
 }

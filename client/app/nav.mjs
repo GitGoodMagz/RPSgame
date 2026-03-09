@@ -15,10 +15,25 @@ function applyView(view) {
   const createView = document.querySelector('[data-view="create"]');
   const manageView = document.querySelector('[data-view="manage"]');
 
-  if (createTab) createTab.classList.toggle("active", view === "create");
-  if (manageTab) manageTab.classList.toggle("active", view === "manage");
-  if (createView) createView.classList.toggle("hidden", view !== "create");
-  if (manageView) manageView.classList.toggle("hidden", view !== "manage");
+  if (createTab) {
+    createTab.classList.toggle("active", view === "create");
+    createTab.setAttribute("aria-current", view === "create" ? "page" : "false");
+  }
+
+  if (manageTab) {
+    manageTab.classList.toggle("active", view === "manage");
+    manageTab.setAttribute("aria-current", view === "manage" ? "page" : "false");
+  }
+
+  if (createView) {
+    createView.classList.toggle("hidden", view !== "create");
+    createView.setAttribute("aria-hidden", String(view !== "create"));
+  }
+
+  if (manageView) {
+    manageView.classList.toggle("hidden", view !== "manage");
+    manageView.setAttribute("aria-hidden", String(view !== "manage"));
+  }
 }
 
 export function setView(view) {
