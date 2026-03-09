@@ -1,56 +1,72 @@
 # Rock Paper Scissors (RPSgame)
 
-A web-based Rock–Paper–Scissors application built with a structured client–server architecture.
+A web-based Rock–Paper–Scissors application built with a client–server architecture.
 
----
+## Live Application
 
-## Live Deployment
-
-Application URL:  
 https://rpsgame-ml6j.onrender.com
 
-The application is deployed as a Render Web Service.
+## Features
 
-User data is stored persistently in a PostgreSQL database hosted on Render.
-
----
+Feature map:  
+https://miro.com/app/board/uXjVGO2CLQc=/?share_link_id=92355642496
 
 ## Architecture
 
-### Client
+The project consists of:
 
-- Single Page Application (SPA)
-- Custom Web Components
-- ES Modules
-- Centralized state using the Observer pattern
-- Single fetch abstraction for API communication
-- Relative URLs only
+- Single Page Application (SPA) client
+- Express-based REST-ish API
+- Router-based backend
+- PostgreSQL persistent storage
 
-### Server
+## Internationalization
 
-- Node.js with Express
-- Router-based API structure
-- Middleware separated into modules
-- REST-ish JSON API
+The application supports multiple languages.
 
----
+Supported languages:
 
-## Storage
+- English (`en`)
+- Norwegian (`nb`)
 
-User accounts and plays are stored persistently in PostgreSQL (Render).
+Both server-side and client-side error messages are localized based on the browser language.
 
-The server connects using the `DATABASE_URL` environment variable.
+Server language detection uses the `Accept-Language` request header.
 
-Idempotency keys are stored in memory.
+Client language detection uses `navigator.languages`.
 
----
+## Progressive Web App
 
-## Documentation
+The application is installable as a Progressive Web App.
 
-- Project Plan: `docs/project-plan.md`
-- API Documentation: `docs/api.md`
+Implemented features:
 
----
+- Web App Manifest
+- Service Worker
+- App shell caching
+- Offline fallback page
+
+## Accessibility
+
+Accessibility improvements follow WCAG guidelines.
+
+Implemented improvements:
+
+- Semantic HTML structure
+- Accessible form labels
+- Keyboard navigation support
+- Focus indicators
+- ARIA live regions for dynamic status messages
+
+The application scores **100 in Lighthouse Accessibility**.
+
+## Project Plan
+
+See: `docs/project-plan.md`
+
+## API Documentation
+
+See: `docs/api.md`
 
 ## Tech Stack
 
@@ -58,5 +74,5 @@ Idempotency keys are stored in memory.
 - Node.js
 - Express
 - PostgreSQL
-- Render (Web Service + Database)
 - Web Components
+- Service Worker

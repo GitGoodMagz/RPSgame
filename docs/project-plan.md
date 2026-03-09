@@ -9,13 +9,14 @@ The system consists of:
 - A Single Page Application (SPA) frontend
 - A REST-ish JSON API
 - A router-based Express backend
-- PostgreSQL-backed user persistence
+- PostgreSQL persistent storage
+- Progressive Web App capabilities
 
 ---
 
 ## Client
 
-The client is implemented as a Single Page Application served by the Express backend (same origin).
+The client is implemented as a Single Page Application served by the Express backend.
 
 ### Characteristics
 
@@ -26,28 +27,78 @@ The client is implemented as a Single Page Application served by the Express bac
 - `<template>`-based rendering
 - Centralized application state
 - Observer pattern for state updates
-- Single fetch abstraction for all API calls
+- Single fetch abstraction for API calls
 - Relative URLs only
 
-### Structure
+### UI Components
 
-- UI components: `user-create`, `user-manage`
-- State module
-- Service/API module
-- Navigation module
-- Utility modules
+- `user-create`
+- `user-manage`
 
-No direct fetch calls inside UI components.
+### Modules
+
+- state management
+- API service layer
+- navigation module
+- DOM helpers
+- internationalization module
+
+---
+
+## Internationalization
+
+The application supports multiple languages.
+
+Supported languages:
+
+- English (`en`)
+- Norwegian (`nb`)
+
+Server responses use the `Accept-Language` request header.
+
+Client-side UI text and error messages use the browser language via `navigator.languages`.
+
+---
+
+## Progressive Web App
+
+The application is installable as a Progressive Web App.
+
+Implementation includes:
+
+- Web App Manifest
+- Service Worker
+- App shell caching
+- Offline fallback page
+
+---
+
+## Accessibility
+
+Accessibility improvements follow WCAG guidelines.
+
+Implemented improvements include:
+
+- Semantic HTML structure
+- Accessible form labels
+- Keyboard navigation
+- Focus indicators
+- ARIA live regions for dynamic status messages
+
+The application achieves a Lighthouse accessibility score of **100**.
 
 ---
 
 ## Server
 
-- Node.js with Express
+The backend is built with Node.js and Express.
+
+### Characteristics
+
 - ES Modules (`.mjs`)
-- Bootstrap-only server entry (`server/index.mjs`)
-- API logic defined in router modules
+- Router-based API structure
 - Static client served by Express
+- Middleware modules separated from routes
 
 ### Routes
 
@@ -55,55 +106,15 @@ No direct fetch calls inside UI components.
 - `/api/plays`
 - `/api/ping`
 
-Middleware is defined in separate modules and applied per route.
-
----
-
-## API
-
-### Users
-
-- `POST /api/users/register`
-- `GET /api/users`
-- `PUT /api/users/:username`
-- `DELETE /api/users/:username`
-
-Passwords are hashed before storage.  
-Sensitive fields are excluded from responses.
-
-### Plays
-
-- `POST /api/plays`
-- `GET /api/plays`
-- `GET /api/plays/stats`
-
-Each play contains:
-
-- id
-- playerMove
-- serverMove
-- result
-- createdAt
-
----
-
-## Middleware
-
-Idempotency middleware:
-
-- Requires `Idempotency-Key` header
-- Applied to `POST /api/plays`
-- Replays cached response for duplicate requests
-
 ---
 
 ## Storage
 
-User accounts and plays are stored persistently in a PostgreSQL database hosted on Render.
+Application data is stored in PostgreSQL hosted on Render.
+
+User accounts and play records are stored persistently in the database.
 
 The server connects using the `DATABASE_URL` environment variable.
-
-Idempotency keys are stored in memory and are not persisted.
 
 ---
 
@@ -113,12 +124,3 @@ Idempotency keys are stored in memory and are not persisted.
 - No plaintext password storage
 - Sensitive data not returned to client
 - No authentication sessions or tokens
-
----
-
-## Deployment
-
-The server is deployed as a Render Web Service.
-
-Live URL:
-https://rpsgame-ml6j.onrender.com

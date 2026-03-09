@@ -202,3 +202,16 @@ Error responses:
 
 - 404 – User not found
 - 500 – Server error
+
+## Localization
+
+Error responses include a localized `message` field based on the
+`Accept-Language` request header.
+
+Example error response:
+
+{
+"ok": false,
+"error": "username_required",
+"message": "Username is required."
+}
