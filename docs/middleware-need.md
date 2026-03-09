@@ -1,9 +1,9 @@
-The application is a PWA and will work offline.
+The application is a PWA and can continue working with cached content.
 
-When reconnecting, the client can retry requests.
+When the client reconnects, requests may be retried.
 
-Retried requests can cause duplicate game results.
+Retried play requests can otherwise create duplicate play records.
 
-The middleware prevents duplicate processing using an Idempotency-Key.
+The middleware uses an `Idempotency-Key` to prevent duplicate processing.
 
-This keeps game data correct without adding more logic.
+This keeps stored play data correct without adding duplicate-handling logic to the route.

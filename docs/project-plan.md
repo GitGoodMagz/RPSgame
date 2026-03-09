@@ -2,7 +2,9 @@
 
 ## Overview
 
-RPSgame is a web-based Rock–Paper–Scissors application built with a client–server architecture.
+RPSgame is a web-based Rock–Paper–Scissors application implemented with a client–server architecture.
+
+The project currently focuses on account management and application infrastructure.
 
 The system consists of:
 
@@ -16,111 +18,74 @@ The system consists of:
 
 ## Client
 
-The client is implemented as a Single Page Application served by the Express backend.
+The client is implemented using:
 
-### Characteristics
+- HTML
+- CSS
+- JavaScript ES modules
+- Web Components
 
-- Single HTML entry point (`index.html`)
-- Hash-based client-side routing
-- ES Modules
-- Custom Web Components
-- `<template>`-based rendering
-- Centralized application state
-- Observer pattern for state updates
+Architecture principles:
+
+- MVC-inspired separation
+- Observer pattern for shared state
 - Single fetch abstraction for API calls
-- Relative URLs only
+- `<template>`-based UI components
+- Relative URLs
 
-### UI Components
+Features implemented:
 
-- `user-create`
-- `user-manage`
-
-### Modules
-
-- state management
-- API service layer
-- navigation module
-- DOM helpers
-- internationalization module
-
----
-
-## Internationalization
-
-The application supports multiple languages.
-
-Supported languages:
-
-- English (`en`)
-- Norwegian (`nb`)
-
-Server responses use the `Accept-Language` request header.
-
-Client-side UI text and error messages use the browser language via `navigator.languages`.
-
----
-
-## Progressive Web App
-
-The application is installable as a Progressive Web App.
-
-Implementation includes:
-
-- Web App Manifest
-- Service Worker
-- App shell caching
-- Offline fallback page
-
----
-
-## Accessibility
-
-Accessibility improvements follow WCAG guidelines.
-
-Implemented improvements include:
-
-- Semantic HTML structure
-- Accessible form labels
-- Keyboard navigation
-- Focus indicators
-- ARIA live regions for dynamic status messages
-
-The application achieves a Lighthouse accessibility score of **100**.
+- Create user
+- List users
+- Update user password
+- Delete user
+- Terms of Service consent
+- Internationalization (English / Norwegian)
+- Accessible UI
+- Progressive Web App support
 
 ---
 
 ## Server
 
-The backend is built with Node.js and Express.
+The backend uses:
 
-### Characteristics
-
-- ES Modules (`.mjs`)
+- Node.js
+- Express
 - Router-based API structure
-- Static client served by Express
-- Middleware modules separated from routes
+- Middleware for request handling
+- PostgreSQL storage
 
-### Routes
+Responsibilities:
 
-- `/api/users`
-- `/api/plays`
-- `/api/ping`
-
----
-
-## Storage
-
-Application data is stored in PostgreSQL hosted on Render.
-
-User accounts and play records are stored persistently in the database.
-
-The server connects using the `DATABASE_URL` environment variable.
+- User management
+- Password hashing
+- API validation
+- Error handling
+- Idempotency protection for retryable requests
 
 ---
 
-## Security
+## Data
 
-- Password hashing using PBKDF2 (`crypto`)
-- No plaintext password storage
-- Sensitive data not returned to client
-- No authentication sessions or tokens
+User accounts store:
+
+- username
+- password hash
+- account creation time
+- Terms of Service acceptance timestamp
+
+Passwords are never stored in plain text.
+
+---
+
+## Progressive Web App
+
+The application supports installation as a PWA.
+
+Features:
+
+- Web App Manifest
+- Service Worker
+- App shell caching
+- Offline fallback page

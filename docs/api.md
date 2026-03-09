@@ -1,185 +1,93 @@
 # RPS API (REST-ish)
 
-Base URL: Same origin (served by Express)
+Base URL: same origin (served by Express)
 
 All requests and responses use JSON.
 
 ---
 
-## Resource: Play
+## GET /api/ping
 
-Fields:
+Health check endpoint.
 
-- id (string)
-- playerMove ("rock" | "paper" | "scissors")
-- serverMove ("rock" | "paper" | "scissors")
-- result ("win" | "loss" | "draw")
-- createdAt (ISO timestamp)
-
----
-
-## POST /api/plays
-
-Create a play.
-
-Headers:
-
-- Content-Type: application/json
-- Idempotency-Key: <string> (required)
-
-Request body:
+Response
 
 {
-"playerMove": "rock"
+  "ok": true,
+  "message": "pong"
 }
-
-Success (201):
-
-{
-"id": "...",
-"playerMove": "rock",
-"serverMove": "...",
-"result": "...",
-"createdAt": "..."
-}
-
-Error responses:
-
-- 400 – Missing Idempotency-Key
-- 400 – Invalid player move
-
-Duplicate requests with the same `Idempotency-Key`
-return the cached response and do not create a new play.
-
----
-
-## GET /api/plays
-
-Return all recorded plays.
-
-Success (200):
-
-[
-{
-"id": "...",
-"playerMove": "...",
-"serverMove": "...",
-"result": "...",
-"createdAt": "..."
-}
-]
-
----
-
-## GET /api/plays/stats
-
-Return aggregated statistics.
-
-Success (200):
-
-{
-"totalPlays": number,
-"wins": number,
-"losses": number,
-"draws": number,
-"playerMoves": {
-"rock": number,
-"paper": number,
-"scissors": number
-}
-}
-
----
-
-## Resource: User
-
-Stored fields:
-
-- username
-- password (hashed)
-- createdAt
-- tosAcceptedAt
-
-Passwords are never stored in plaintext.
-
----
-
-## POST /api/users/register
-
-Register a new user.
-
-Request body:
-
-{
-"username": "player1",
-"password": "secret123",
-"tosAccepted": true
-}
-
-Success (201):
-
-{
-"ok": true,
-"user": {
-"username": "...",
-"createdAt": "...",
-"tosAcceptedAt": "..."
-}
-}
-
-Error responses:
-
-- 400 – Missing username or password
-- 409 – Username already taken
-- 500 – Server error
 
 ---
 
 ## GET /api/users
 
-Return all users (non-sensitive fields only).
+List all users.
 
-Success (200):
+Response
 
 {
-"ok": true,
-"users": [
-{
-"username": "...",
-"createdAt": "...",
-"tosAcceptedAt": "..."
+  "users": [
+    {
+      "username": "player1",
+      "createdAt": "ISO timestamp",
+      "tosAcceptedAt": "ISO timestamp"
+    }
+  ]
 }
-]
+
+---
+
+## POST /api/users/register
+
+Create a new user.
+
+Headers
+
+Content-Type: application/json
+
+Body
+
+{
+  "username": "string",
+  "password": "string",
+  "tosAccepted": true
+}
+
+Response
+
+{
+  "user": {
+    "username": "string",
+    "createdAt": "ISO timestamp",
+    "tosAcceptedAt": "ISO timestamp"
+  }
 }
 
 ---
 
 ## PUT /api/users/:username
 
-Update user password.
+Update a user password.
 
-Request body:
+Headers
 
-{
-"password": "newSecret123"
-}
+Content-Type: application/json
 
-Success (200):
+Body
 
 {
-"ok": true,
-"user": {
-"username": "...",
-"createdAt": "...",
-"tosAcceptedAt": "..."
-}
+  "password": "string"
 }
 
-Error responses:
+Response
 
-- 400 – Invalid password
-- 404 – User not found
-- 500 – Server error
+{
+  "user": {
+    "username": "string",
+    "createdAt": "ISO timestamp",
+    "tosAcceptedAt": "ISO timestamp"
+  }
+}
 
 ---
 
@@ -187,31 +95,22 @@ Error responses:
 
 Delete a user.
 
-Success (200):
+Response
 
 {
-"ok": true,
-"user": {
-"username": "...",
-"createdAt": "...",
-"tosAcceptedAt": "..."
-}
+  "user": {
+    "username": "string"
+  }
 }
 
-Error responses:
+---
 
-- 404 – User not found
-- 500 – Server error
+## Errors
 
-## Localization
+Errors return JSON with an error code.
 
-Error responses include a localized `message` field based on the
-`Accept-Language` request header.
-
-Example error response:
+Example
 
 {
-"ok": false,
-"error": "username_required",
-"message": "Username is required."
+  "error": "username_taken"
 }

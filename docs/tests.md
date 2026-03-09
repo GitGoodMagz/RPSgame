@@ -1,49 +1,128 @@
-Testing
+# Testing
 
-Static content
+## Static content
 
-Tested /tos.html and /dataPrivacyPolicy.html
-Result: Pages load correctly
-Meaning: Terms of Service and Data Privacy Policy are accessible to users before consent.
+Tested:
 
-API availability
+/ToS.html
+/dataPrivacyPolicy.html
 
-Tested GET /api/ping
-Result: { "ok": true, "message": "pong" }
-Meaning: Server is running and API is reachable.
+Result
 
-Idempotency
+Pages load correctly.
 
-Tested POST /api/plays twice with the same Idempotency-Key
-Result: First request 201 Created, second request 409 Conflict
-Meaning: Duplicate requests are correctly rejected.
+Meaning
 
-User creation with consent
+Terms of Service and Data Privacy Policy are available to users before creating an account.
 
-Tested POST /api/users with acceptToS: true
-Result: 201 Created with user data and token
-Meaning: Users can be created through the API when active consent is given.
+---
 
-User creation without consent
+## API availability
 
-Tested POST /api/users with acceptToS: false
-Result: 400 Bad Request
-Meaning: Active consent is required before account creation.
+Tested
 
-Authenticated user access
+GET /api/ping
 
-Tested GET /api/users/me with valid token
-Result: 200 OK
-Meaning: Token correctly identifies and authenticates the user.
+Result
 
-Account deletion / consent retraction
+{ "ok": true, "message": "pong" }
 
-Tested DELETE /api/users/me
-Result: 204 No Content
-Meaning: Users can delete their account and retract consent.
+Meaning
 
-Token invalidation
+Server is running and API is reachable.
 
-Tested GET /api/users/me after account deletion
-Result: 401 Unauthorized
-Meaning: Tokens are invalidated after account deletion.
+---
+
+## User creation
+
+Tested
+
+POST /api/users/register
+
+Result
+
+User is created when valid data is provided.
+
+Meaning
+
+User registration works correctly.
+
+---
+
+## User listing
+
+Tested
+
+GET /api/users
+
+Result
+
+Returns a list of users.
+
+Meaning
+
+Stored users can be retrieved from the API.
+
+---
+
+## User update
+
+Tested
+
+PUT /api/users/:username
+
+Result
+
+User password updates successfully.
+
+Meaning
+
+User editing works.
+
+---
+
+## User deletion
+
+Tested
+
+DELETE /api/users/:username
+
+Result
+
+User is removed.
+
+Meaning
+
+User data can be deleted from the system.
+
+---
+
+## Play creation
+
+Tested
+
+POST /api/plays with Idempotency-Key
+
+Result
+
+A play is created and duplicate retries return the cached response.
+
+Meaning
+
+Idempotency protection works for play creation.
+
+---
+
+## Play statistics
+
+Tested
+
+GET /api/plays/stats
+
+Result
+
+Returns aggregated play statistics.
+
+Meaning
+
+Play statistics are available through the API.

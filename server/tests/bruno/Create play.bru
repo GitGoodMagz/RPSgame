@@ -5,9 +5,20 @@ meta {
 }
 
 post {
-  url: http://localhost:3000/api/stats
-  body: none
+  url: http://localhost:3000/api/plays
+  body: json
   auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Idempotency-Key: play-test-1
+}
+
+body:json {
+  {
+    "playerMove": "rock"
+  }
 }
 
 settings {
