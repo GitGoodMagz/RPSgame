@@ -1,5 +1,6 @@
 import { Router } from "express";
 import idempotency from "../../modules/middleware/idempotency.mjs";
+import requireAuth from "../../modules/middleware/requireAuth.mjs";
 import { serverError } from "../../modules/i18n.mjs";
 import { initPlaysTable, insertPlay, listPlays, getPlayStats } from "../../modules/plays/pgStore.mjs";
 
@@ -25,13 +26,14 @@ function randomServerMove() {
 }
 
 let didInit = false;
+
 async function ensureInit() {
   if (didInit) return;
   await initPlaysTable();
   didInit = true;
 }
 
-playsRouter.post("/", idempotency(), async (req, res) => {
+playsRouter.post("/", requireAuth, idempotency(), async (req, res) => {
   try {
     await ensureInit();
 
@@ -42,11 +44,13 @@ playsRouter.post("/", idempotency(), async (req, res) => {
       });
     }
 
+    const username = req.authUser.username;
     const serverMove = randomServerMove();
     const result = decideResult(playerMove, serverMove);
 
     const play = {
       id: makeId("play"),
+      username,
       playerMove,
       serverMove,
       result,
@@ -60,20 +64,20 @@ playsRouter.post("/", idempotency(), async (req, res) => {
   }
 });
 
-playsRouter.get("/", async (req, res) => {
+playsRouter.get("/", requireAuth, async (req, res) => {
   try {
     await ensureInit();
-    const plays = await listPlays();
+    const plays = await listPlays(req.authUser.isAdmin ? "" : req.authUser.username);
     return res.json(plays);
   } catch {
     return serverError(req, res, 500, "server_error");
   }
 });
 
-playsRouter.get("/stats", async (req, res) => {
+playsRouter.get("/stats", requireAuth, async (req, res) => {
   try {
     await ensureInit();
-    const stats = await getPlayStats();
+    const stats = await getPlayStats(req.authUser.isAdmin ? "" : req.authUser.username);
     return res.json(stats);
   } catch {
     return serverError(req, res, 500, "server_error");

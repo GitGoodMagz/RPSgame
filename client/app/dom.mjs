@@ -33,9 +33,12 @@ export function formatDateTime(value) {
 
 export function formatMeta(user) {
   const parts = [];
+
   const created = formatDateTime(user.createdAt);
   if (created) parts.push(`${t("manage.metaCreated")}: ${created}`);
-  const tos = formatDateTime(user.tosAcceptedAt);
-  if (tos) parts.push(`${t("manage.metaTermsAccepted")}: ${tos}`);
+
+  const accepted = formatDateTime(user.tosAcceptedAt);
+  if (accepted) parts.push(`${t("manage.metaAccepted")}: ${accepted}`);
+
   return parts.join(" • ");
 }

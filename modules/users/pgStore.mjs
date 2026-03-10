@@ -1,4 +1,13 @@
 import pg from "pg";
+import {
+  createUsersTableSql,
+  addIsAdminColumnSql,
+  listUsersSql,
+  findUserByUsernameSql,
+  insertUserSql,
+  updateUserByUsernameSql,
+  deleteUserByUsernameSql
+} from "./queries.mjs";
 
 const { Pool } = pg;
 
@@ -12,55 +21,51 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false }
 });
 
-export async function initUsersTable() {
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS users (
-      username TEXT PRIMARY KEY,
-      password TEXT NOT NULL,
-      created_at TEXT NOT NULL,
-      tos_accepted_at TEXT
-    )
-  `);
+function parsePassword(value) {
+  if (value && typeof value === "object") return value;
+
+  try {
+    return JSON.parse(String(value || ""));
+  } catch {
+    return null;
+  }
 }
 
-export async function listUsers() {
-  const r = await pool.query(
-    `SELECT username, password, created_at, tos_accepted_at
-     FROM users
-     ORDER BY created_at DESC`
-  );
-  return r.rows.map((row) => ({
-    username: row.username,
-    password: row.password,
-    createdAt: row.created_at,
-    tosAcceptedAt: row.tos_accepted_at
-  }));
-}
-
-export async function findUserByUsername(usernameLower) {
-  const r = await pool.query(
-    `SELECT username, password, created_at, tos_accepted_at
-     FROM users
-     WHERE LOWER(username) = $1
-     LIMIT 1`,
-    [usernameLower]
-  );
-  const row = r.rows[0];
-  if (!row) return null;
+function mapUserRow(row) {
   return {
     username: row.username,
-    password: row.password,
+    password: parsePassword(row.password),
     createdAt: row.created_at,
-    tosAcceptedAt: row.tos_accepted_at
+    tosAcceptedAt: row.tos_accepted_at,
+    isAdmin: Boolean(row.is_admin)
   };
 }
 
+export async function initUsersTable() {
+  await pool.query(createUsersTableSql);
+  await pool.query(addIsAdminColumnSql);
+}
+
+export async function listUsers() {
+  const result = await pool.query(listUsersSql);
+  return result.rows.map(mapUserRow);
+}
+
+export async function findUserByUsername(usernameLower) {
+  const result = await pool.query(findUserByUsernameSql, [usernameLower]);
+  const row = result.rows[0];
+  if (!row) return null;
+  return mapUserRow(row);
+}
+
 export async function insertUser(user) {
-  await pool.query(
-    `INSERT INTO users (username, password, created_at, tos_accepted_at)
-     VALUES ($1, $2, $3, $4)`,
-    [user.username, user.password, user.createdAt, user.tosAcceptedAt]
-  );
+  await pool.query(insertUserSql, [
+    user.username,
+    JSON.stringify(user.password),
+    user.createdAt,
+    user.tosAcceptedAt,
+    Boolean(user.isAdmin)
+  ]);
 }
 
 export async function updateUserByUsername(usernameLower, patch) {
@@ -72,30 +77,19 @@ export async function updateUserByUsername(usernameLower, patch) {
     ...patch
   };
 
-  await pool.query(
-    `UPDATE users
-     SET password = $2,
-         tos_accepted_at = $3
-     WHERE LOWER(username) = $1`,
-    [usernameLower, next.password, next.tosAcceptedAt]
-  );
+  await pool.query(updateUserByUsernameSql, [
+    usernameLower,
+    JSON.stringify(next.password),
+    next.tosAcceptedAt,
+    Boolean(next.isAdmin)
+  ]);
 
   return next;
 }
 
 export async function deleteUserByUsername(usernameLower) {
-  const r = await pool.query(
-    `DELETE FROM users
-     WHERE LOWER(username) = $1
-     RETURNING username, password, created_at, tos_accepted_at`,
-    [usernameLower]
-  );
-  const row = r.rows[0];
+  const result = await pool.query(deleteUserByUsernameSql, [usernameLower]);
+  const row = result.rows[0];
   if (!row) return null;
-  return {
-    username: row.username,
-    password: row.password,
-    createdAt: row.created_at,
-    tosAcceptedAt: row.tos_accepted_at
-  };
+  return mapUserRow(row);
 }

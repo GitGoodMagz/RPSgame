@@ -10,19 +10,13 @@ function getViewFromHash() {
 }
 
 function applyView(view) {
-  const createTab = document.querySelector('[data-nav="create"]');
-  const manageTab = document.querySelector('[data-nav="manage"]');
   const createView = document.querySelector('[data-view="create"]');
   const manageView = document.querySelector('[data-view="manage"]');
+  const shellUser = document.getElementById("shellUser");
 
-  if (createTab) {
-    createTab.classList.toggle("active", view === "create");
-    createTab.setAttribute("aria-current", view === "create" ? "page" : "false");
-  }
-
-  if (manageTab) {
-    manageTab.classList.toggle("active", view === "manage");
-    manageTab.setAttribute("aria-current", view === "manage" ? "page" : "false");
+  if (shellUser) {
+    shellUser.textContent = state.currentUser ? state.currentUser.username : "";
+    shellUser.classList.toggle("hidden", !state.currentUser);
   }
 
   if (createView) {
@@ -38,37 +32,28 @@ function applyView(view) {
 
 export function setView(view) {
   const nextView = viewIds.includes(view) ? view : "create";
-  if (nextView === "manage" && state.users.length === 0) return;
+  const allowedView = nextView === "manage" && !state.currentUser ? "create" : nextView;
 
-  state.view = nextView;
+  state.view = allowedView;
   state.error = "";
   notify();
 
-  const nextHash = `#/${nextView}`;
+  const nextHash = `#/${allowedView}`;
   if (location.hash !== nextHash) location.hash = nextHash;
 
-  applyView(nextView);
+  applyView(allowedView);
 
-  if (nextView === "manage") refreshUsers();
+  if (allowedView === "manage") {
+    refreshUsers();
+  }
 }
 
 export function wireNavigation() {
-  const createTab = document.querySelector('[data-nav="create"]');
-  const manageTab = document.querySelector('[data-nav="manage"]');
-
-  if (createTab) createTab.addEventListener("click", () => setView("create"));
-  if (manageTab) manageTab.addEventListener("click", () => setView("manage"));
-
   window.addEventListener("hashchange", () => {
-    const view = getViewFromHash();
-    setView(view);
+    setView(getViewFromHash());
   });
 }
 
 export function bootstrapView() {
-  const view = getViewFromHash();
-  state.view = view;
-  notify();
-  applyView(view);
-  if (view === "manage") refreshUsers();
+  setView(state.currentUser ? "manage" : getViewFromHash());
 }

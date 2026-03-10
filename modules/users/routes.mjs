@@ -1,147 +1,92 @@
 import { Router } from "express";
-import { hashPassword, verifyPassword } from "../password.mjs";
 import { serverError } from "../i18n.mjs";
+import requireAuth from "../middleware/requireAuth.mjs";
+import { createSession, deleteSession } from "./sessions.mjs";
 import {
-  initUsersTable,
-  listUsers,
-  findUserByUsername,
-  insertUser,
-  updateUserByUsername,
-  deleteUserByUsername
-} from "./pgStore.mjs";
+  ensureUsersReady,
+  registerUser,
+  loginUser,
+  listVisibleUsers,
+  updateVisibleUser,
+  deleteVisibleUser
+} from "./service.mjs";
 
 const router = Router();
 
-function s(v) {
-  return String(v ?? "").trim();
-}
+function sendKnownError(req, res, error) {
+  if (error?.code && error?.status) {
+    return serverError(req, res, error.status, error.code);
+  }
 
-function p(v) {
-  return String(v ?? "");
-}
-
-function toPublicUser(u) {
-  return {
-    username: u.username,
-    password: null,
-    tosAccepted: Boolean(u.tosAcceptedAt),
-    createdAt: u.createdAt ?? null,
-    tosAcceptedAt: u.tosAcceptedAt ?? null
-  };
-}
-
-let didInit = false;
-async function ensureInit() {
-  if (didInit) return;
-  await initUsersTable();
-  didInit = true;
+  return serverError(req, res, 500, "server_error");
 }
 
 router.post("/register", async (req, res) => {
   try {
-    await ensureInit();
-
-    const username = s(req.body?.username);
-    const passwordPlain = p(req.body?.password);
-    const tosAccepted = Boolean(req.body?.tosAccepted);
-
-    if (!username) return serverError(req, res, 400, "username_required");
-    if (!passwordPlain) return serverError(req, res, 400, "password_required");
-
-    const existing = await findUserByUsername(username.toLowerCase());
-    if (existing) return serverError(req, res, 409, "username_taken");
-
-    const now = new Date().toISOString();
-
-    const user = {
-      username,
-      password: hashPassword(passwordPlain),
-      createdAt: now,
-      tosAcceptedAt: tosAccepted ? now : null
-    };
-
-    await insertUser(user);
-
-    return res.status(201).json({ ok: true, user: toPublicUser(user) });
-  } catch {
-    return serverError(req, res, 500, "server_error");
+    const user = await registerUser(req.body || {});
+    const token = createSession(user.username);
+    return res.status(201).json({ ok: true, token, user });
+  } catch (error) {
+    return sendKnownError(req, res, error);
   }
 });
 
 router.post("/login", async (req, res) => {
   try {
-    await ensureInit();
+    const user = await loginUser(req.body || {});
+    const token = createSession(user.username);
+    return res.json({ ok: true, token, user });
+  } catch (error) {
+    return sendKnownError(req, res, error);
+  }
+});
 
-    const username = s(req.body?.username);
-    const passwordPlain = p(req.body?.password);
-
-    if (!username) return serverError(req, res, 400, "username_required");
-    if (!passwordPlain) return serverError(req, res, 400, "password_required");
-
-    const user = await findUserByUsername(username.toLowerCase());
-    if (!user) return serverError(req, res, 401, "invalid_credentials");
-
-    const ok = verifyPassword(passwordPlain, user.password);
-    if (!ok) return serverError(req, res, 401, "invalid_credentials");
-
-    return res.json({ ok: true, user: toPublicUser(user) });
+router.post("/logout", requireAuth, async (req, res) => {
+  try {
+    await ensureUsersReady();
+    deleteSession(req.authToken);
+    return res.json({ ok: true });
   } catch {
     return serverError(req, res, 500, "server_error");
   }
 });
 
-router.get("/", async (_req, res) => {
+router.get("/me", requireAuth, async (req, res) => {
   try {
-    await ensureInit();
-    const users = await listUsers();
-    return res.json({ ok: true, users: users.map(toPublicUser) });
+    await ensureUsersReady();
+    return res.json({ ok: true, user: req.authUser });
   } catch {
-    return serverError(_req, res, 500, "server_error");
+    return serverError(req, res, 500, "server_error");
   }
 });
 
-router.put("/:username", async (req, res) => {
+router.get("/", requireAuth, async (req, res) => {
   try {
-    await ensureInit();
+    const users = await listVisibleUsers(req.authUser);
+    return res.json({ ok: true, users });
+  } catch (error) {
+    return sendKnownError(req, res, error);
+  }
+});
 
-    const usernameParam = s(req.params?.username);
-    if (!usernameParam) return serverError(req, res, 400, "username_required");
+router.put("/:username", requireAuth, async (req, res) => {
+  try {
+    const user = await updateVisibleUser(req.authUser, req.params?.username, req.body || {});
+    return res.json({ ok: true, user });
+  } catch (error) {
+    return sendKnownError(req, res, error);
+  }
+});
 
-    const passwordPlain = p(req.body?.password);
-    const tosAccepted = req.body?.tosAccepted;
-
-    const patch = {};
-
-    if (passwordPlain) {
-      patch.password = hashPassword(passwordPlain);
+router.delete("/:username", requireAuth, async (req, res) => {
+  try {
+    const user = await deleteVisibleUser(req.authUser, req.params?.username);
+    if (req.authUser.username.toLowerCase() === user.username.toLowerCase()) {
+      deleteSession(req.authToken);
     }
-
-    if (typeof tosAccepted === "boolean") {
-      patch.tosAcceptedAt = tosAccepted ? new Date().toISOString() : null;
-    }
-
-    const updated = await updateUserByUsername(usernameParam.toLowerCase(), patch);
-    if (!updated) return serverError(req, res, 404, "user_not_found");
-
-    return res.json({ ok: true, user: toPublicUser(updated) });
-  } catch {
-    return serverError(req, res, 500, "server_error");
-  }
-});
-
-router.delete("/:username", async (req, res) => {
-  try {
-    await ensureInit();
-
-    const usernameParam = s(req.params?.username);
-    if (!usernameParam) return serverError(req, res, 400, "username_required");
-
-    const removed = await deleteUserByUsername(usernameParam.toLowerCase());
-    if (!removed) return serverError(req, res, 404, "user_not_found");
-
-    return res.json({ ok: true, user: toPublicUser(removed) });
-  } catch {
-    return serverError(req, res, 500, "server_error");
+    return res.json({ ok: true, user });
+  } catch (error) {
+    return sendKnownError(req, res, error);
   }
 });
 

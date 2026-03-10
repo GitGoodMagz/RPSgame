@@ -1,128 +1,25 @@
-# Testing
+# API Tests
 
-## Static content
+API endpoints are tested using Bruno.
 
-Tested:
+Test files are located in:
 
-/ToS.html
-/dataPrivacyPolicy.html
+server/tests/bruno
 
-Result
+Tests include:
 
-Pages load correctly.
+- create user
+- login
+- logout
+- edit user
+- delete user
+- create play
+- get stats
+- ping
 
-Meaning
+Tests verify:
 
-Terms of Service and Data Privacy Policy are available to users before creating an account.
-
----
-
-## API availability
-
-Tested
-
-GET /api/ping
-
-Result
-
-{ "ok": true, "message": "pong" }
-
-Meaning
-
-Server is running and API is reachable.
-
----
-
-## User creation
-
-Tested
-
-POST /api/users/register
-
-Result
-
-User is created when valid data is provided.
-
-Meaning
-
-User registration works correctly.
-
----
-
-## User listing
-
-Tested
-
-GET /api/users
-
-Result
-
-Returns a list of users.
-
-Meaning
-
-Stored users can be retrieved from the API.
-
----
-
-## User update
-
-Tested
-
-PUT /api/users/:username
-
-Result
-
-User password updates successfully.
-
-Meaning
-
-User editing works.
-
----
-
-## User deletion
-
-Tested
-
-DELETE /api/users/:username
-
-Result
-
-User is removed.
-
-Meaning
-
-User data can be deleted from the system.
-
----
-
-## Play creation
-
-Tested
-
-POST /api/plays with Idempotency-Key
-
-Result
-
-A play is created and duplicate retries return the cached response.
-
-Meaning
-
-Idempotency protection works for play creation.
-
----
-
-## Play statistics
-
-Tested
-
-GET /api/plays/stats
-
-Result
-
-Returns aggregated play statistics.
-
-Meaning
-
-Play statistics are available through the API.
+- correct responses
+- authentication behaviour
+- database updates
+- statistics calculation

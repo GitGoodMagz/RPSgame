@@ -1,91 +1,135 @@
 # Project Plan – Rock Paper Scissors (RPSgame)
 
 ## Overview
+RPSgame is a web-based Rock–Paper–Scissors application with a client–server architecture.
 
-RPSgame is a web-based Rock–Paper–Scissors application implemented with a client–server architecture.
-
-The project currently focuses on account management and application infrastructure.
-
-The system consists of:
-
-- A Single Page Application (SPA) frontend
-- A REST-ish JSON API
-- A router-based Express backend
-- PostgreSQL persistent storage
-- Progressive Web App capabilities
-
----
+Users can create an account, log in, and play Rock–Paper–Scissors against a server-generated opponent (bot). Each round is stored and statistics are tracked per user.
 
 ## Client
 
-The client is implemented using:
+Single-page application built with:
 
 - HTML
 - CSS
-- JavaScript ES modules
+- ES Modules
 - Web Components
 
 Architecture principles:
 
-- MVC-inspired separation
-- Observer pattern for shared state
-- Single fetch abstraction for API calls
-- `<template>`-based UI components
-- Relative URLs
+- Custom elements
+- `<template>` usage
+- MVC-inspired separation (UI / Logic / Data)
+- Observer pattern for state
+- Single centralized fetch abstraction
+- Relative URLs only
 
-Features implemented:
+### Main views
 
-- Create user
-- List users
-- Update user password
-- Delete user
-- Terms of Service consent
-- Internationalization (English / Norwegian)
-- Accessible UI
-- Progressive Web App support
+**Access account**
+- Choose login or create account
+- Register a new account
+- Log in to an existing account
 
----
+**Game**
+- Play Rock / Paper / Scissors
+- See latest round result
+- See total statistics
+
+**Manage account**
+- Change password
+- Delete account
+- View account metadata
 
 ## Server
 
-The backend uses:
+Node.js server using:
 
-- Node.js
 - Express
+- ES Modules (.mjs)
 - Router-based API structure
-- Middleware for request handling
-- PostgreSQL storage
+
+API routes:
+
+- /api/users
+- /api/plays
+- /api/ping
 
 Responsibilities:
 
-- User management
-- Password hashing
-- API validation
-- Error handling
-- Idempotency protection for retryable requests
+- authentication
+- user management
+- gameplay logic
+- statistics tracking
 
----
+## Database
 
-## Data
+PostgreSQL database.
 
-User accounts store:
+Stores:
 
+- users
+- game plays
+
+Passwords are hashed before storage.
+
+## Gameplay
+
+The player plays against a server-generated move.
+
+Flow:
+
+1. player chooses move
+2. server generates move
+3. server calculates result
+4. play stored in database
+5. statistics updated
+
+Moves:
+
+- rock
+- paper
+- scissors
+
+Results:
+
+- win
+- loss
+- draw
+
+## Authentication
+
+Login creates a session stored in localStorage containing:
+
+- token
 - username
-- password hash
-- account creation time
-- Terms of Service acceptance timestamp
 
-Passwords are never stored in plain text.
+The token is used for authenticated API requests.
 
----
+## Account metadata
 
-## Progressive Web App
+Each account stores:
 
-The application supports installation as a PWA.
+- creation date
+- Terms of Service acceptance
+- Privacy Policy acceptance
 
-Features:
+Metadata is shown in the manage account view.
 
-- Web App Manifest
-- Service Worker
-- App shell caching
-- Offline fallback page
+## PWA
+
+The project supports Progressive Web App features:
+
+- manifest
+- service worker
+- offline capability
+
+Service worker is disabled during localhost development.
+
+## Future improvements
+
+Possible future features:
+
+- multiplayer matches
+- player lobby
+- player challenges
+- live matches

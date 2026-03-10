@@ -10,24 +10,25 @@
     <link rel="icon" href="./icons/icon-192.png" />
   </head>
   <body>
-    <main class="wrap" id="mainContent">
+    <main class="wrap">
       <header class="top">
         <div class="brand">
-          <h1 data-i18n="app.title">RPSgame</h1>
+          <h1>RPSgame</h1>
         </div>
-        <nav class="nav" aria-label="Main navigation" data-i18n-aria-label="shell.navLabel">
-          <button type="button" data-nav="create" class="tab active" data-i18n="shell.createTab">Create user</button>
-          <button type="button" data-nav="manage" class="tab" disabled data-i18n="shell.manageTab">Manage users</button>
-        </nav>
+
+        <div id="shellPanel" class="shellPanel hidden">
+          <div id="shellUser" class="headerUser"></div>
+          <button id="accountLogoutButton" type="button">Log out</button>
+        </div>
       </header>
 
       <section class="card" data-view="create" aria-labelledby="createViewHeading">
-        <h2 id="createViewHeading" data-i18n="shell.createHeading">Create user</h2>
+        <h2 id="createViewHeading">Log in or create account</h2>
         <user-create></user-create>
       </section>
 
       <section class="card hidden" data-view="manage" aria-labelledby="manageViewHeading" aria-hidden="true">
-        <h2 id="manageViewHeading" data-i18n="shell.manageHeading">Manage users</h2>
+        <h2 id="manageViewHeading" class="srOnly">Manage account</h2>
         <user-manage></user-manage>
       </section>
     </main>
@@ -35,10 +36,10 @@
     <dialog id="legalDialog" class="dialog" aria-labelledby="legalTitle">
       <form method="dialog" class="dialogInner">
         <div class="dialogTop">
-          <h2 class="dialogTitle" id="legalTitle" data-i18n="shell.legalTitleTerms">Terms</h2>
+          <h2 class="dialogTitle" id="legalTitle">Terms</h2>
           <div class="dialogTabs">
-            <button type="button" class="tabBtn" data-doc="tos" data-i18n="shell.terms">Terms</button>
-            <button type="button" class="tabBtn" data-doc="privacy" data-i18n="shell.privacy">Privacy Policy</button>
+            <button type="button" class="tabBtn" data-doc="tos">Terms</button>
+            <button type="button" class="tabBtn" data-doc="privacy">Privacy Policy</button>
           </div>
         </div>
 
@@ -47,44 +48,73 @@
         </div>
 
         <div class="dialogActions">
-          <button type="submit" data-i18n="shell.close">Close</button>
+          <button type="submit">Close</button>
         </div>
       </form>
     </dialog>
 
     <template id="createUserTemplate">
       <div class="row">
-        <label class="srOnly" data-field="usernameLabel" for="createUsernameInput">Username</label>
-        <input id="createUsernameInput" data-field="usernameInput" placeholder="username" autocomplete="username" />
+        <section class="subcard" data-field="modePicker">
+          <div class="row">
+            <button data-field="showRegisterButton" type="button">Create account</button>
+            <button data-field="showLoginButton" type="button">Log in</button>
+          </div>
+        </section>
 
-        <label class="srOnly" data-field="passwordLabel" for="createPasswordInput">Password</label>
-        <input id="createPasswordInput" data-field="passwordInput" placeholder="password" type="password" autocomplete="new-password" />
+        <section class="subcard hidden" data-field="registerSection">
+          <div class="toolbar">
+            <h3 data-field="registerHeading">Create account</h3>
+            <button data-field="registerBackButton" type="button" class="tab">Back</button>
+          </div>
 
-        <label class="small line">
-          <span class="legalLine">
-            <span data-field="tosPrefix">I accept</span>
-            <button type="button" class="link" data-field="openTerms">Terms</button>
-            <span data-field="tosMiddle">and acknowledge</span>
-            <button type="button" class="link" data-field="openPrivacy">Privacy Policy</button>
-          </span>
-          <input data-field="termsCheckbox" type="checkbox" />
-        </label>
+          <div class="row">
+            <label class="srOnly" data-field="registerUsernameLabel" for="registerUsernameInput">Username</label>
+            <input id="registerUsernameInput" data-field="registerUsernameInput" placeholder="username" autocomplete="username" />
 
-        <button data-field="createButton" type="button">Create user</button>
-        <div class="small" data-field="createHint" role="status" aria-live="polite"></div>
+            <label class="srOnly" data-field="registerPasswordLabel" for="registerPasswordInput">Password</label>
+            <input id="registerPasswordInput" data-field="registerPasswordInput" placeholder="password" type="password" autocomplete="new-password" />
+
+            <label class="small line">
+              <span class="legalLine">
+                <span data-field="tosPrefix">I accept</span>
+                <button type="button" class="link" data-field="openTerms">Terms</button>
+                <span data-field="tosMiddle">and acknowledge</span>
+                <button type="button" class="link" data-field="openPrivacy">Privacy Policy</button>
+              </span>
+              <input data-field="termsCheckbox" type="checkbox" />
+            </label>
+
+            <button data-field="registerButton" type="button">Create account</button>
+            <div class="small" data-field="registerHint" role="status" aria-live="polite"></div>
+          </div>
+        </section>
+
+        <section class="subcard hidden" data-field="loginSection">
+          <div class="toolbar">
+            <h3 data-field="loginHeading">Log in</h3>
+            <button data-field="loginBackButton" type="button" class="tab">Back</button>
+          </div>
+
+          <div class="row">
+            <label class="srOnly" data-field="loginUsernameLabel" for="loginUsernameInput">Username</label>
+            <input id="loginUsernameInput" data-field="loginUsernameInput" placeholder="username" autocomplete="username" />
+
+            <label class="srOnly" data-field="loginPasswordLabel" for="loginPasswordInput">Password</label>
+            <input id="loginPasswordInput" data-field="loginPasswordInput" placeholder="password" type="password" autocomplete="current-password" />
+
+            <button data-field="loginButton" type="button">Log in</button>
+            <div class="small" data-field="loginHint" role="status" aria-live="polite"></div>
+          </div>
+        </section>
       </div>
     </template>
 
     <template id="manageTemplate">
       <div class="row">
-        <div class="toolbar">
-          <button data-field="refreshButton" type="button">Refresh</button>
-          <div class="small" data-field="helpText" role="status" aria-live="polite"></div>
-        </div>
-
         <section data-field="emptyState" class="empty hidden">
-          <div class="small" data-field="emptyText">No users yet.</div>
-          <button data-field="goCreateButton" type="button">Go create a user</button>
+          <div class="small" data-field="emptyText">No users available.</div>
+          <button data-field="goCreateButton" type="button">Go to log in</button>
         </section>
 
         <section data-field="contentState" class="hidden">
@@ -92,17 +122,17 @@
 
           <div class="split">
             <section class="subcard hidden" data-field="editCard">
-              <h3 data-field="editHeading">Edit</h3>
+              <h3 data-field="editHeading">Change password</h3>
               <div class="row">
                 <div class="small" data-field="selectedUserLabel">Selected: none</div>
                 <label class="srOnly" data-field="newPasswordLabel" for="manageNewPasswordInput">New password</label>
-                <input id="manageNewPasswordInput" data-field="newPasswordInput" placeholder="new password (optional)" type="password" autocomplete="new-password" />
+                <input id="manageNewPasswordInput" data-field="newPasswordInput" placeholder="new password" type="password" autocomplete="new-password" />
                 <button data-field="saveButton" type="button">Save changes</button>
               </div>
             </section>
 
             <section class="subcard hidden" data-field="deleteCard">
-              <h3 data-field="deleteHeading">Delete</h3>
+              <h3 data-field="deleteHeading">Delete account</h3>
               <div class="row">
                 <div class="small" data-field="selectedUserLabel2">Selected: none</div>
                 <button data-field="deleteButton" type="button">Delete selected user</button>

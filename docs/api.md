@@ -1,116 +1,68 @@
-# RPS API (REST-ish)
+# API Documentation – RPSgame
 
-Base URL: same origin (served by Express)
+Base path:
 
-All requests and responses use JSON.
+/api
 
----
+## Users API
 
-## GET /api/ping
+Create user
 
-Health check endpoint.
+POST /api/users
 
-Response
-
-{
-  "ok": true,
-  "message": "pong"
-}
-
----
-
-## GET /api/users
-
-List all users.
-
-Response
+Body:
 
 {
-  "users": [
-    {
-      "username": "player1",
-      "createdAt": "ISO timestamp",
-      "tosAcceptedAt": "ISO timestamp"
-    }
-  ]
+  "username": "player",
+  "password": "password"
 }
 
----
+Login
 
-## POST /api/users/register
+POST /api/users/login
 
-Create a new user.
-
-Headers
-
-Content-Type: application/json
-
-Body
+Body:
 
 {
-  "username": "string",
-  "password": "string",
-  "tosAccepted": true
+  "username": "player",
+  "password": "password"
 }
 
-Response
+Logout
+
+POST /api/users/logout
+
+Requires authentication.
+
+Edit user password
+
+PATCH /api/users/:username
+
+Delete user
+
+DELETE /api/users/:username
+
+## Plays API
+
+Create play
+
+POST /api/plays
+
+Body:
 
 {
-  "user": {
-    "username": "string",
-    "createdAt": "ISO timestamp",
-    "tosAcceptedAt": "ISO timestamp"
-  }
+  "move": "rock"
 }
 
----
+Server generates opponent move and returns the result.
 
-## PUT /api/users/:username
+Get statistics
 
-Update a user password.
+GET /api/plays/stats
 
-Headers
+Returns:
 
-Content-Type: application/json
-
-Body
-
-{
-  "password": "string"
-}
-
-Response
-
-{
-  "user": {
-    "username": "string",
-    "createdAt": "ISO timestamp",
-    "tosAcceptedAt": "ISO timestamp"
-  }
-}
-
----
-
-## DELETE /api/users/:username
-
-Delete a user.
-
-Response
-
-{
-  "user": {
-    "username": "string"
-  }
-}
-
----
-
-## Errors
-
-Errors return JSON with an error code.
-
-Example
-
-{
-  "error": "username_taken"
-}
+- total plays
+- wins
+- losses
+- draws

@@ -4,10 +4,8 @@ const messages = {
       title: "RPSgame"
     },
     shell: {
-      createTab: "Create user",
-      manageTab: "Manage users",
-      createHeading: "Create user",
-      manageHeading: "Manage users",
+      createHeading: "Log in or create account",
+      manageHeading: "Account",
       navLabel: "Main navigation",
       terms: "Terms",
       privacy: "Privacy Policy",
@@ -15,7 +13,9 @@ const messages = {
       legalTitleTerms: "Terms",
       legalTitlePrivacy: "Privacy Policy"
     },
-    create: {
+    auth: {
+      registerHeading: "Create account",
+      loginHeading: "Log in",
       usernameLabel: "Username",
       usernamePlaceholder: "username",
       passwordLabel: "Password",
@@ -23,26 +23,54 @@ const messages = {
       tosPrefix: "I accept",
       tosMiddle: "and acknowledge",
       checkboxLabel: "Accept terms",
-      createButton: "Create user",
-      created: "User created.",
-      termsRequired: "Please accept Terms before creating a user."
+      registerButton: "Create account",
+      loginButton: "Log in",
+      created: "Account created.",
+      loggedIn: "Logged in.",
+      registerHint: "Create a new account to start playing.",
+      loginHint: "Log in with an existing account."
     },
     manage: {
       refreshButton: "Refresh",
-      helpText: "Select a user to edit or delete.",
-      noUsers: "No users yet.",
-      goCreateButton: "Go create a user",
-      editHeading: "Edit",
-      deleteHeading: "Delete",
+      logoutButton: "Log out",
+      playButton: "Play",
+      exitGameButton: "Manage account",
+      adminText: "Admin",
+      noUsers: "No users available.",
+      goCreateButton: "Go to log in",
+      editHeading: "Change password",
+      deleteHeading: "Delete account",
       selected: "Selected",
       none: "none",
       newPasswordLabel: "New password",
-      newPasswordPlaceholder: "new password (optional)",
+      newPasswordPlaceholder: "new password",
       saveButton: "Save changes",
       deleteButton: "Delete selected user",
       userListLabel: "User list",
       metaCreated: "Created",
-      metaTermsAccepted: "Terms accepted"
+      metaAccepted: "Terms and Privacy accepted"
+    },
+    play: {
+      heading: "Rock Paper Scissors",
+      moveHeading: "Choose your move",
+      latestHeading: "Last round",
+      statsHeading: "Stats",
+      playHint: "Pick rock, paper, or scissors.",
+      played: "Played",
+      wins: "Wins",
+      losses: "Losses",
+      draws: "Draws",
+      playerMove: "You",
+      serverMove: "Bot",
+      result: "Result",
+      rock: "Rock",
+      paper: "Paper",
+      scissors: "Scissors",
+      emptyLatest: "No round played yet.",
+      emptyStats: "No stats yet.",
+      win: "Win",
+      loss: "Loss",
+      draw: "Draw"
     },
     errors: {
       request_failed: "Request failed.",
@@ -54,7 +82,11 @@ const messages = {
       server_error: "Server error.",
       invalid_player_move: "Invalid player move.",
       missing_idempotency_key: "Missing Idempotency-Key header.",
-      network_error: "Network error."
+      network_error: "Network error.",
+      unauthorized: "You must log in first.",
+      forbidden: "You are not allowed to do that.",
+      terms_required: "You must accept the terms first.",
+      admin_protected: "The built-in admin account cannot be changed or deleted."
     },
     offline: {
       title: "Offline",
@@ -66,10 +98,8 @@ const messages = {
       title: "RPSgame"
     },
     shell: {
-      createTab: "Opprett bruker",
-      manageTab: "Administrer brukere",
-      createHeading: "Opprett bruker",
-      manageHeading: "Administrer brukere",
+      createHeading: "Logg inn eller opprett konto",
+      manageHeading: "Konto",
       navLabel: "Hovednavigasjon",
       terms: "Vilkår",
       privacy: "Personvernerklæring",
@@ -77,7 +107,9 @@ const messages = {
       legalTitleTerms: "Vilkår",
       legalTitlePrivacy: "Personvernerklæring"
     },
-    create: {
+    auth: {
+      registerHeading: "Opprett konto",
+      loginHeading: "Logg inn",
       usernameLabel: "Brukernavn",
       usernamePlaceholder: "brukernavn",
       passwordLabel: "Passord",
@@ -85,26 +117,54 @@ const messages = {
       tosPrefix: "Jeg godtar",
       tosMiddle: "og bekrefter",
       checkboxLabel: "Godta vilkår",
-      createButton: "Opprett bruker",
-      created: "Bruker opprettet.",
-      termsRequired: "Du må godta vilkårene før du kan opprette bruker."
+      registerButton: "Opprett konto",
+      loginButton: "Logg inn",
+      created: "Konto opprettet.",
+      loggedIn: "Logget inn.",
+      registerHint: "Opprett en ny konto for å starte.",
+      loginHint: "Logg inn med en eksisterende konto."
     },
     manage: {
       refreshButton: "Oppdater",
-      helpText: "Velg en bruker for å redigere eller slette.",
-      noUsers: "Ingen brukere ennå.",
-      goCreateButton: "Gå til opprett bruker",
-      editHeading: "Rediger",
-      deleteHeading: "Slett",
+      logoutButton: "Logg ut",
+      playButton: "Spill",
+      exitGameButton: "Administrer konto",
+      adminText: "Admin",
+      noUsers: "Ingen brukere tilgjengelig.",
+      goCreateButton: "Gå til logg inn",
+      editHeading: "Endre passord",
+      deleteHeading: "Slett konto",
       selected: "Valgt",
       none: "ingen",
       newPasswordLabel: "Nytt passord",
-      newPasswordPlaceholder: "nytt passord (valgfritt)",
+      newPasswordPlaceholder: "nytt passord",
       saveButton: "Lagre endringer",
       deleteButton: "Slett valgt bruker",
       userListLabel: "Brukerliste",
       metaCreated: "Opprettet",
-      metaTermsAccepted: "Vilkår godtatt"
+      metaAccepted: "Vilkår og personvern godtatt"
+    },
+    play: {
+      heading: "Stein Saks Papir",
+      moveHeading: "Velg trekk",
+      latestHeading: "Siste runde",
+      statsHeading: "Statistikk",
+      playHint: "Velg stein, papir eller saks.",
+      played: "Spilt",
+      wins: "Seire",
+      losses: "Tap",
+      draws: "Uavgjort",
+      playerMove: "Du",
+      serverMove: "Bot",
+      result: "Resultat",
+      rock: "Stein",
+      paper: "Papir",
+      scissors: "Saks",
+      emptyLatest: "Ingen runde spilt ennå.",
+      emptyStats: "Ingen statistikk ennå.",
+      win: "Seier",
+      loss: "Tap",
+      draw: "Uavgjort"
     },
     errors: {
       request_failed: "Forespørselen mislyktes.",
@@ -116,7 +176,11 @@ const messages = {
       server_error: "Serverfeil.",
       invalid_player_move: "Ugyldig trekk.",
       missing_idempotency_key: "Mangler Idempotency-Key-header.",
-      network_error: "Nettverksfeil."
+      network_error: "Nettverksfeil.",
+      unauthorized: "Du må logge inn først.",
+      forbidden: "Du har ikke tilgang til dette.",
+      terms_required: "Du må godta vilkårene først.",
+      admin_protected: "Den innebygde admin-kontoen kan ikke endres eller slettes."
     },
     offline: {
       title: "Frakoblet",
@@ -125,8 +189,8 @@ const messages = {
   }
 };
 
-function getPathValue(obj, path) {
-  return path.split(".").reduce((acc, key) => acc?.[key], obj);
+function getPathValue(object, path) {
+  return path.split(".").reduce((accumulator, key) => accumulator?.[key], object);
 }
 
 export function getClientLanguage() {
@@ -134,34 +198,34 @@ export function getClientLanguage() {
     ? navigator.languages
     : [navigator.language || "en"];
 
-  const normalized = languages.map((v) => String(v || "").toLowerCase());
+  const normalized = languages.map((value) => String(value || "").toLowerCase());
 
-  if (normalized.some((v) => v.startsWith("nb") || v.startsWith("no"))) return "nb";
+  if (normalized.some((value) => value.startsWith("nb") || value.startsWith("no"))) return "nb";
   return "en";
 }
 
 export function t(key) {
-  const lang = getClientLanguage();
-  return getPathValue(messages[lang], key) ?? getPathValue(messages.en, key) ?? key;
+  const language = getClientLanguage();
+  return getPathValue(messages[language], key) ?? getPathValue(messages.en, key) ?? key;
 }
 
 export function applyStaticTranslations() {
   document.documentElement.lang = getClientLanguage();
   document.title = t("app.title");
 
-  for (const el of document.querySelectorAll("[data-i18n]")) {
-    const key = el.getAttribute("data-i18n");
-    if (key) el.textContent = t(key);
+  for (const element of document.querySelectorAll("[data-i18n]")) {
+    const key = element.getAttribute("data-i18n");
+    if (key) element.textContent = t(key);
   }
 
-  for (const el of document.querySelectorAll("[data-i18n-placeholder]")) {
-    const key = el.getAttribute("data-i18n-placeholder");
-    if (key) el.setAttribute("placeholder", t(key));
+  for (const element of document.querySelectorAll("[data-i18n-placeholder]")) {
+    const key = element.getAttribute("data-i18n-placeholder");
+    if (key) element.setAttribute("placeholder", t(key));
   }
 
-  for (const el of document.querySelectorAll("[data-i18n-aria-label]")) {
-    const key = el.getAttribute("data-i18n-aria-label");
-    if (key) el.setAttribute("aria-label", t(key));
+  for (const element of document.querySelectorAll("[data-i18n-aria-label]")) {
+    const key = element.getAttribute("data-i18n-aria-label");
+    if (key) element.setAttribute("aria-label", t(key));
   }
 }
 
