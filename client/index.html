@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>RPSgame</title>
+    <title>ROCK - PAPER - SCISSOR</title>
     <meta name="theme-color" content="#0b4fa8" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="stylesheet" href="./app.css" />
@@ -12,13 +12,18 @@
   <body>
     <main class="wrap">
       <header class="top">
+        <div class="topSpacer" aria-hidden="true"></div>
+
         <div class="brand">
-          <h1>RPSgame</h1>
+          <h1>ROCK - PAPER - SCISSOR</h1>
         </div>
 
         <div id="shellPanel" class="shellPanel hidden">
           <div id="shellUser" class="headerUser"></div>
-          <button id="accountLogoutButton" type="button">Log out</button>
+          <div class="shellActions">
+            <button id="accountManageButton" type="button" class="hidden">Manage account</button>
+            <button id="accountLogoutButton" type="button">Log out</button>
+          </div>
         </div>
       </header>
 

@@ -1,7 +1,7 @@
 const messages = {
   en: {
     app: {
-      title: "RPSgame"
+      title: "ROCK - PAPER - SCISSOR"
     },
     shell: {
       createHeading: "Log in or create account",
@@ -31,7 +31,6 @@ const messages = {
       loginHint: "Log in with an existing account."
     },
     manage: {
-      refreshButton: "Refresh",
       logoutButton: "Log out",
       playButton: "Play",
       exitGameButton: "Manage account",
@@ -51,11 +50,10 @@ const messages = {
       metaAccepted: "Terms and Privacy accepted"
     },
     play: {
-      heading: "Rock Paper Scissors",
+      heading: "ROCK - PAPER - SCISSOR",
       moveHeading: "Choose your move",
       latestHeading: "Last round",
       statsHeading: "Stats",
-      playHint: "Pick rock, paper, or scissors.",
       played: "Played",
       wins: "Wins",
       losses: "Losses",
@@ -95,7 +93,7 @@ const messages = {
   },
   nb: {
     app: {
-      title: "RPSgame"
+      title: "ROCK - PAPER - SCISSOR"
     },
     shell: {
       createHeading: "Logg inn eller opprett konto",
@@ -125,7 +123,6 @@ const messages = {
       loginHint: "Logg inn med en eksisterende konto."
     },
     manage: {
-      refreshButton: "Oppdater",
       logoutButton: "Logg ut",
       playButton: "Spill",
       exitGameButton: "Administrer konto",
@@ -145,11 +142,10 @@ const messages = {
       metaAccepted: "Vilkår og personvern godtatt"
     },
     play: {
-      heading: "Stein Saks Papir",
-      moveHeading: "Velg trekk",
-      latestHeading: "Siste runde",
-      statsHeading: "Statistikk",
-      playHint: "Velg stein, papir eller saks.",
+      heading: "ROCK - PAPER - SCISSOR",
+      moveHeading: "Choose your move",
+      latestHeading: "Last round",
+      statsHeading: "Stats",
       played: "Spilt",
       wins: "Seire",
       losses: "Tap",
@@ -157,9 +153,9 @@ const messages = {
       playerMove: "Du",
       serverMove: "Bot",
       result: "Resultat",
-      rock: "Stein",
-      paper: "Papir",
-      scissors: "Saks",
+      rock: "Rock",
+      paper: "Paper",
+      scissors: "Scissors",
       emptyLatest: "Ingen runde spilt ennå.",
       emptyStats: "Ingen statistikk ennå.",
       win: "Seier",

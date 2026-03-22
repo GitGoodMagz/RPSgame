@@ -3,7 +3,7 @@ import { saveSession } from "../auth.mjs";
 import { UserService } from "../userService.mjs";
 import { PlayService } from "../playService.mjs";
 import { getTemplate, getField, createElement, formatMeta } from "../dom.mjs";
-import { clearAppSession, syncNavAvailability } from "../users.mjs";
+import { clearAppSession, refreshUsers, syncNavAvailability } from "../users.mjs";
 import { setView } from "../nav.mjs";
 import { t } from "../i18n.mjs";
 
@@ -71,16 +71,16 @@ export class ManageUser extends HTMLElement {
     this.gamePanel.classList.add("gamePanel");
 
     const gameTop = createElement("div", "gameTopRow");
-    this.gameHeading = createElement("h2");
-    this.gameHeading.classList.add("gameTitle");
     this.exitGameButton = createElement("button", "tab");
     this.exitGameButton.type = "button";
-    gameTop.append(this.gameHeading, this.exitGameButton);
+    this.exitGameButton.classList.add("hidden");
+    gameTop.append(this.exitGameButton);
 
     const split = createElement("div", "split");
 
     const movesCard = createElement("section", "subcard");
     this.movesHeading = createElement("h3");
+    this.movesHeading.classList.add("gameSectionHeading");
     const movesRow = createElement("div", "gameMoveGrid");
     this.rockButton = createElement("button");
     this.rockButton.type = "button";
@@ -93,12 +93,14 @@ export class ManageUser extends HTMLElement {
 
     const latestCard = createElement("section", "subcard");
     this.latestHeading = createElement("h3");
-    this.latestBody = createElement("div", "row");
+    this.latestHeading.classList.add("gameSectionHeading");
+    this.latestBody = createElement("div", "row gameBodyCenter");
     latestCard.append(this.latestHeading, this.latestBody);
 
     const statsCard = createElement("section", "subcard");
     this.statsHeading = createElement("h3");
-    this.statsBody = createElement("div", "row");
+    this.statsHeading.classList.add("gameSectionHeading");
+    this.statsBody = createElement("div", "row gameBodyCenter");
     statsCard.append(this.statsHeading, this.statsBody);
 
     split.append(movesCard, latestCard, statsCard);
@@ -121,7 +123,6 @@ export class ManageUser extends HTMLElement {
 
     if (this.pageLogoutButton) this.pageLogoutButton.textContent = t("manage.logoutButton");
 
-    this.gameHeading.textContent = t("play.heading");
     this.movesHeading.textContent = t("play.moveHeading");
     this.latestHeading.textContent = t("play.latestHeading");
     this.statsHeading.textContent = t("play.statsHeading");
@@ -157,7 +158,6 @@ export class ManageUser extends HTMLElement {
 
     this.exitGameButton.addEventListener("click", () => {
       state.gameMode = false;
-      state.latestPlay = null;
       notify();
     });
 
@@ -182,6 +182,9 @@ export class ManageUser extends HTMLElement {
           saveSession(state.authToken, updatedUser);
         }
 
+        await refreshUsers();
+        state.status = "ready";
+        state.error = "";
         notify();
       } catch (error) {
         state.status = "error";
@@ -207,6 +210,11 @@ export class ManageUser extends HTMLElement {
           setView("create");
           return;
         }
+
+        await refreshUsers();
+        state.status = "ready";
+        state.error = "";
+        notify();
       } catch (error) {
         state.status = "error";
         state.error = error?.message || t("errors.request_failed");
@@ -263,13 +271,14 @@ export class ManageUser extends HTMLElement {
 
     if (this.pageLogoutButton) {
       this.pageLogoutButton.disabled = loading || !currentState.currentUser;
-      this.pageLogoutButton.classList.toggle("hidden", gameMode || !currentState.currentUser);
+      this.pageLogoutButton.classList.toggle("hidden", !currentState.currentUser);
     }
 
     this.playButton.disabled = loading || !canPlay || gameMode;
+    this.playRow.hidden = gameMode || !canPlay;
     this.exitGameButton.disabled = loading;
-    this.saveButton.disabled = loading || !hasSelection;
     this.newPasswordInput.disabled = loading || !hasSelection;
+    this.saveButton.disabled = loading || !hasSelection;
     this.deleteButton.disabled = loading || !hasSelection;
     this.rockButton.disabled = loading || !canPlay;
     this.paperButton.disabled = loading || !canPlay;
@@ -280,14 +289,12 @@ export class ManageUser extends HTMLElement {
 
     if (!hasUsers) {
       this.userList.replaceChildren();
-      this.playRow.classList.add("hidden");
       this.editCard.classList.add("hidden");
       this.deleteCard.classList.add("hidden");
       this.gamePanel.classList.add("hidden");
       return;
     }
 
-    this.playRow.classList.toggle("hidden", gameMode || !canPlay);
     this.userList.classList.toggle("hidden", gameMode);
     this.manageCards.classList.toggle("hidden", gameMode);
     this.gamePanel.classList.toggle("hidden", !gameMode);

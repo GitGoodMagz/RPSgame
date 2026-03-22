@@ -1,6 +1,7 @@
 # Project Plan – Rock Paper Scissors (RPSgame)
 
 ## Overview
+
 RPSgame is a web-based Rock–Paper–Scissors application with a client–server architecture.
 
 Users can create an account, log in, and play Rock–Paper–Scissors against a server-generated opponent (bot). Each round is stored and statistics are tracked per user.
@@ -26,16 +27,19 @@ Architecture principles:
 ### Main views
 
 **Access account**
+
 - Choose login or create account
 - Register a new account
 - Log in to an existing account
 
 **Game**
+
 - Play Rock / Paper / Scissors
 - See latest round result
-- See total statistics
+- See total statistics (wins, losses, draws)
 
 **Manage account**
+
 - Change password
 - Delete account
 - View account metadata
@@ -60,6 +64,13 @@ Responsibilities:
 - user management
 - gameplay logic
 - statistics tracking
+- session handling
+
+Structure:
+
+- routes: handle HTTP requests
+- service: contains business logic
+- queries: handles database access
 
 ## Database
 
@@ -74,7 +85,7 @@ Passwords are hashed before storage.
 
 ## Gameplay
 
-The player plays against a server-generated move.
+The player currently plays against a server-generated move (bot).
 
 Flow:
 
@@ -103,7 +114,22 @@ Login creates a session stored in localStorage containing:
 - token
 - username
 
-The token is used for authenticated API requests.
+The token is used for authenticated API requests and is validated through middleware on protected routes.
+
+## Middleware
+
+Middleware is used to handle shared responsibilities like authentication and request control.
+
+**requireAuth**
+
+- checks Bearer token
+- resolves session and user
+- blocks unauthorized requests (401)
+
+**idempotency**
+
+- used on play endpoint
+- prevents duplicate requests from being processed
 
 ## Account metadata
 

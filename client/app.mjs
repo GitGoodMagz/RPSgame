@@ -2,7 +2,7 @@ import { subscribe, state } from "./app/state.mjs";
 import { loadStoredSession } from "./app/auth.mjs";
 import { bootstrapSession, syncNavAvailability } from "./app/users.mjs";
 import { setupLegalDialogTabs } from "./app/legalDialog.mjs";
-import { wireNavigation, bootstrapView } from "./app/nav.mjs";
+import { wireNavigation, bootstrapView, setView } from "./app/nav.mjs";
 import { applyStaticTranslations } from "./app/i18n.mjs";
 import { CreateUser } from "./app/components/userCreate.mjs";
 import { ManageUser } from "./app/components/userManage.mjs";
@@ -10,12 +10,16 @@ import { ManageUser } from "./app/components/userManage.mjs";
 function syncHeader(currentState) {
   const shellPanel = document.getElementById("shellPanel");
   const shellUser = document.getElementById("shellUser");
+  const accountManageButton = document.getElementById("accountManageButton");
 
-  if (!shellPanel || !shellUser) return;
+  if (!shellPanel || !shellUser || !accountManageButton) return;
 
   const loggedIn = Boolean(currentState.currentUser);
+  const showManageButton = loggedIn && Boolean(currentState.gameMode);
+
   shellPanel.classList.toggle("hidden", !loggedIn);
   shellUser.textContent = loggedIn ? currentState.currentUser.username : "";
+  accountManageButton.classList.toggle("hidden", !showManageButton);
 }
 
 function isLocalhost() {
@@ -42,6 +46,14 @@ customElements.define("user-manage", ManageUser);
 
 setupLegalDialogTabs();
 wireNavigation();
+
+const accountManageButton = document.getElementById("accountManageButton");
+if (accountManageButton) {
+  accountManageButton.addEventListener("click", () => {
+    state.gameMode = false;
+    setView("manage");
+  });
+}
 
 subscribe((currentState) => {
   syncNavAvailability(currentState);
