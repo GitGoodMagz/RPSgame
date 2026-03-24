@@ -11,6 +11,11 @@ https://rpsgame-ml6j.onrender.com
 Feature map:  
 https://miro.com/app/board/uXjVGO2CLQc=/?share_link_id=92355642496
 
+- User registration and login
+- Play against server (bot)
+- Per-user game history and statistics
+- Account management (change password, delete account)
+
 ## Architecture
 
 The project consists of:

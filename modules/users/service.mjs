@@ -5,7 +5,7 @@ import {
   findUserByUsername,
   insertUser,
   updateUserByUsername,
-  deleteUserByUsername
+  deleteUserByUsername,
 } from "./pgStore.mjs";
 
 const adminUsername = "admin";
@@ -25,10 +25,11 @@ function sameUser(a, b) {
 
 function toPublicUser(user) {
   return {
+    id: user.id ?? null,
     username: user.username,
     createdAt: user.createdAt ?? null,
     tosAcceptedAt: user.tosAcceptedAt ?? null,
-    isAdmin: Boolean(user.isAdmin)
+    isAdmin: Boolean(user.isAdmin),
   };
 }
 
@@ -66,7 +67,7 @@ export async function ensureUsersReady() {
       password: hashPassword(adminPassword),
       createdAt: now,
       tosAcceptedAt: now,
-      isAdmin: true
+      isAdmin: true,
     });
   }
 
@@ -89,16 +90,16 @@ export async function registerUser(payload) {
 
   const now = new Date().toISOString();
 
-  const user = {
+  await insertUser({
     username,
     password: hashPassword(passwordPlain),
     createdAt: now,
     tosAcceptedAt: now,
-    isAdmin: false
-  };
+    isAdmin: false,
+  });
 
-  await insertUser(user);
-  return toPublicUser(user);
+  const createdUser = await findUserByUsername(username.toLowerCase());
+  return toPublicUser(createdUser);
 }
 
 export async function loginUser(payload) {
@@ -151,7 +152,7 @@ export async function updateVisibleUser(viewer, targetUsername, payload) {
   if (!passwordPlain) throw createAccessError(400, "password_required");
 
   const updated = await updateUserByUsername(target.toLowerCase(), {
-    password: hashPassword(passwordPlain)
+    password: hashPassword(passwordPlain),
   });
 
   if (!updated) throw createAccessError(404, "user_not_found");

@@ -4,7 +4,7 @@
 
 RPSgame is a web-based Rock–Paper–Scissors application with a client–server architecture.
 
-Users can create an account, log in, and play Rock–Paper–Scissors against a server-generated opponent (bot). Each round is stored and statistics are tracked per user.
+Users can create an account, log in, and play against a server-generated opponent. Each user has their own game history and statistics.
 
 ## Client
 
@@ -28,15 +28,14 @@ Architecture principles:
 
 **Access account**
 
-- Choose login or create account
-- Register a new account
-- Log in to an existing account
+- Register new account
+- Log in to existing account
 
 **Game**
 
 - Play Rock / Paper / Scissors
-- See latest round result
-- See total statistics (wins, losses, draws)
+- View latest round result
+- View personal statistics
 
 **Manage account**
 
@@ -63,14 +62,7 @@ Responsibilities:
 - authentication
 - user management
 - gameplay logic
-- statistics tracking
-- session handling
-
-Structure:
-
-- routes: handle HTTP requests
-- service: contains business logic
-- queries: handles database access
+- per-user statistics tracking
 
 ## Database
 
@@ -79,33 +71,21 @@ PostgreSQL database.
 Stores:
 
 - users
-- game plays
+- user_play_history
+
+Each play is linked to a username, ensuring per-user game history and statistics.
 
 Passwords are hashed before storage.
 
 ## Gameplay
 
-The player currently plays against a server-generated move (bot).
-
 Flow:
 
 1. player chooses move
 2. server generates move
-3. server calculates result
-4. play stored in database
-5. statistics updated
-
-Moves:
-
-- rock
-- paper
-- scissors
-
-Results:
-
-- win
-- loss
-- draw
+3. result is calculated
+4. play stored for the authenticated user
+5. user-specific statistics updated
 
 ## Authentication
 
@@ -114,22 +94,7 @@ Login creates a session stored in localStorage containing:
 - token
 - username
 
-The token is used for authenticated API requests and is validated through middleware on protected routes.
-
-## Middleware
-
-Middleware is used to handle shared responsibilities like authentication and request control.
-
-**requireAuth**
-
-- checks Bearer token
-- resolves session and user
-- blocks unauthorized requests (401)
-
-**idempotency**
-
-- used on play endpoint
-- prevents duplicate requests from being processed
+The token is used for authenticated API requests.
 
 ## Account metadata
 
@@ -143,19 +108,10 @@ Metadata is shown in the manage account view.
 
 ## PWA
 
-The project supports Progressive Web App features:
+Supports:
 
 - manifest
 - service worker
 - offline capability
 
 Service worker is disabled during localhost development.
-
-## Future improvements
-
-Possible future features:
-
-- multiplayer matches
-- player lobby
-- player challenges
-- live matches

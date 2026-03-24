@@ -20,12 +20,7 @@ function normalizeStats(stats) {
     totalPlays: Number(stats.totalPlays ?? 0),
     wins: Number(stats.wins ?? 0),
     losses: Number(stats.losses ?? 0),
-    draws: Number(stats.draws ?? 0),
-    playerMoves: {
-      rock: Number(stats.playerMoves?.rock ?? 0),
-      paper: Number(stats.playerMoves?.paper ?? 0),
-      scissors: Number(stats.playerMoves?.scissors ?? 0)
-    }
+    draws: Number(stats.draws ?? 0)
   };
 }
 

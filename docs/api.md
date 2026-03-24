@@ -1,68 +1,126 @@
 # API Documentation – RPSgame
 
-Base path:
+## Base URL
 
 /api
 
-## Users API
+---
+
+## Authentication
+
+Protected endpoints require authentication using:
+
+Authorization: Bearer <token>
+
+---
+
+## Users
+
+### POST /api/users
 
 Create user
 
-POST /api/users
-
-Body:
-
+Request:
 {
-  "username": "player",
-  "password": "password"
+"username": "string",
+"password": "string",
+"tosAccepted": true
 }
 
-Login
+---
 
-POST /api/users/login
+### POST /api/users/login
 
-Body:
+Login user
 
+Request:
 {
-  "username": "player",
-  "password": "password"
+"username": "string",
+"password": "string"
 }
 
-Logout
-
-POST /api/users/logout
-
-Requires authentication.
-
-Edit user password
-
-PATCH /api/users/:username
-
-Delete user
-
-DELETE /api/users/:username
-
-## Plays API
-
-Create play
-
-POST /api/plays
-
-Body:
-
+Response:
 {
-  "move": "rock"
+"username": "string",
+"createdAt": "string",
+"tosAcceptedAt": "string",
+"isAdmin": false
 }
 
-Server generates opponent move and returns the result.
+---
 
-Get statistics
+### GET /api/users/me
 
-GET /api/plays/stats
+Get current user (requires auth)
 
-Returns:
+---
 
-- total plays
-- wins
-- losses
-- draws
+### PATCH /api/users/:username
+
+Update user (password) (requires auth)
+
+---
+
+### DELETE /api/users/:username
+
+Delete user (requires auth)
+
+---
+
+## Plays
+
+### POST /api/plays
+
+Create a play for the authenticated user (requires auth)
+
+Request:
+{
+"playerMove": "rock | paper | scissors"
+}
+
+Response:
+{
+"id": "string",
+"username": "string",
+"playerMove": "string",
+"serverMove": "string",
+"result": "win | loss | draw",
+"createdAt": "string"
+}
+
+---
+
+### GET /api/plays/stats
+
+Get statistics for the authenticated user (requires auth)
+
+Response:
+{
+"totalPlays": number,
+"wins": number,
+"losses": number,
+"draws": number
+}
+
+---
+
+## Ping
+
+### GET /api/ping
+
+Response:
+{
+"message": "pong"
+}
+
+---
+
+## Errors
+
+Common responses:
+
+- 400 Bad Request – invalid input
+- 401 Unauthorized – missing or invalid token
+- 403 Forbidden – not allowed
+- 404 Not Found – resource not found
+- 409 Conflict – username already exists
