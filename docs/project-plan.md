@@ -43,6 +43,12 @@ Architecture principles:
 - Delete account
 - View account metadata
 
+**ADMIN**
+
+- hardcoded
+- can see/manage all current accounts
+- can not play the game, only for management
+
 ## Server
 
 Node.js server using:
