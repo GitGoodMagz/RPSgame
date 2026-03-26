@@ -124,3 +124,29 @@ Common responses:
 - 403 Forbidden – not allowed
 - 404 Not Found – resource not found
 - 409 Conflict – username already exists
+
+# API Tests
+
+API endpoints are tested using Bruno.
+
+Test files are located in:
+
+server/tests/bruno
+
+Tests include:
+
+- create user
+- login
+- logout
+- edit user
+- delete user
+- create play
+- get stats
+- ping
+
+Tests verify:
+
+- correct responses
+- authentication behaviour
+- database updates
+- statistics calculation

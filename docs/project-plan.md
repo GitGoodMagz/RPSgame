@@ -121,3 +121,9 @@ Supports:
 - offline capability
 
 Service worker is disabled during localhost development.
+
+## Local testing/debug
+
+When testing locally:
+"export DATABASE_URL='MY-EXTERNAL-DB-URL'
+npm start" - to access localhost:3000.
