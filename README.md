@@ -23,7 +23,7 @@ The project consists of:
 - Single Page Application (SPA) client
 - Express-based REST-ish API
 - Router-based backend
-- PostgreSQL persistent storage
+- PostgreSQL persistent storage hosted on Render (web service and PostgreSQL database)
 
 ## Internationalization
 
